@@ -6,8 +6,13 @@ import { StatusBar } from "expo-status-bar";
 export default function RootLayout() {
   return (
     <React.Fragment>
-      <StatusBar style="auto" />
-      <Stack />
+      <StatusBar style="dark" backgroundColor="#FFFFFF" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: '#FFFFFF' },
+        }}
+      />
     </React.Fragment>
   );
 }
