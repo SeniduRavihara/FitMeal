@@ -12,7 +12,9 @@ export default function RootLayout() {
           headerShown: false,
           contentStyle: { backgroundColor: '#FFFFFF' },
         }}
-      />
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </React.Fragment>
   );
 }
