@@ -1,12 +1,17 @@
 import { View, ScrollView, Pressable, Image } from "react-native";
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { Card } from "../components/common/Card";
 import { Button } from "../components/Button";
 import { DUMMY_USER, DUMMY_USER_SUBSCRIPTION } from "../data/dummyData";
 import { FITNESS_GOALS } from "../constants";
+import { useAuth } from "../contexts/AuthContext";
+import { router } from "expo-router";
 
 export function ProfileScreen() {
+  const { session, signOut } = useAuth();
+
   const handleEditProfile = () => {
     // TODO: Navigate to edit profile
     console.log('Edit profile');
@@ -17,10 +22,60 @@ export function ProfileScreen() {
     console.log('Navigate to:', setting);
   };
 
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
   const userGoal = FITNESS_GOALS.find(goal => goal.id === DUMMY_USER.fitnessGoal);
 
+  // Show sign-in screen for guests
+  if (!session) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+        <View className="flex-1 bg-background justify-center items-center px-6">
+        <View className="items-center space-y-6">
+          <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
+            <AppText variant="h1">👤</AppText>
+          </View>
+          
+          <View className="items-center space-y-2">
+            <AppText variant="h2" weight="bold" center>
+              Welcome Back!
+            </AppText>
+            <AppText variant="body" color="secondary" center>
+              Sign in to view your profile and orders
+            </AppText>
+          </View>
+
+          <View className="w-full space-y-3">
+            <Button
+              title="Sign In"
+              onPress={() => router.push('/(auth)/sign-in')}
+            />
+            <Button
+              title="Create Account"
+              variant="outline"
+              onPress={() => router.push('/(auth)/sign-up')}
+            />
+          </View>
+
+          <Pressable onPress={() => router.back()}>
+            <AppText variant="body" color="secondary">
+              Continue Browsing
+        </AppText>
+      </Pressable>
+    </View>
+  </View>
+  </SafeAreaView>
+);
+  }
+
   return (
-    <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View className="px-4 pt-4 pb-2">
         <AppText variant="h2" weight="bold" className="mb-2">
@@ -236,7 +291,20 @@ export function ProfileScreen() {
             </View>
           </Pressable>
         </Card>
+
+        <Card className="mt-4">
+          <Pressable onPress={handleSignOut} className="py-3">
+            <View className="flex-row items-center">
+              <AppText variant="body" className="mr-3">🚪</AppText>
+              <AppText variant="body" weight="medium" color="red-500" className="flex-1">
+                Sign Out
+              </AppText>
+              <AppText variant="body" color="secondary">›</AppText>
+            </View>
+          </Pressable>
+        </Card>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }

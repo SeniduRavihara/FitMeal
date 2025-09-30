@@ -1,16 +1,31 @@
 import { View, ScrollView, TextInput, Pressable, Image } from "react-native";
 import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { MealCard } from "../components/meal/MealCard";
 import { Button } from "../components/Button";
 import { DUMMY_MEALS, DUMMY_USER } from "../data/dummyData";
 import { MEAL_CATEGORIES } from "../constants";
 import { Meal } from "../types";
+import { useAuth } from "../contexts/AuthContext";
+import GuestHeader from "../components/GuestHeader";
+import AuthPrompt from "../components/AuthPrompt";
+import MealDetailBottomSheet from "../components/meal/MealDetailBottomSheet";
 
 export function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [favorites, setFavorites] = useState<string[]>([]);
+  const [authPromptVisible, setAuthPromptVisible] = useState(false);
+  const [authPromptConfig, setAuthPromptConfig] = useState({
+    title: '',
+    description: '',
+    actionText: '',
+  });
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+  const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
+  
+  const { session } = useAuth();
 
   const filteredMeals = DUMMY_MEALS.filter(meal => {
     const matchesCategory = selectedCategory === 'all' || meal.category === selectedCategory;
@@ -20,11 +35,40 @@ export function HomeScreen() {
   });
 
   const handleAddToCart = (meal: Meal) => {
+    if (!session) {
+      setAuthPromptConfig({
+        title: 'Sign in to place order',
+        description: 'Create an account to start ordering meals',
+        actionText: 'Sign In',
+      });
+      setAuthPromptVisible(true);
+      return;
+    }
     // TODO: Implement add to cart functionality
     console.log('Added to cart:', meal.name);
   };
 
+  const handleMealPress = (meal: Meal) => {
+    setSelectedMeal(meal);
+    setBottomSheetVisible(true);
+  };
+
+  const handleCloseBottomSheet = () => {
+    setBottomSheetVisible(false);
+    setSelectedMeal(null);
+  };
+
   const handleFavorite = (mealId: string) => {
+    if (!session) {
+      setAuthPromptConfig({
+        title: 'Save your favorites',
+        description: 'Sign in to save meals and access them anytime',
+        actionText: 'Sign In',
+      });
+      setAuthPromptVisible(true);
+      return;
+    }
+    
     setFavorites(prev => 
       prev.includes(mealId) 
         ? prev.filter(id => id !== mealId)
@@ -39,23 +83,33 @@ export function HomeScreen() {
     return 'Good evening';
   };
 
+  const getUserName = () => {
+    if (session?.user) {
+      return session.user.email?.split('@')[0] || 'User';
+    }
+    return 'Guest';
+  };
+
   return (
-    <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View className="px-4 pt-4 pb-2">
-        <View className="flex-row justify-between items-center mb-4">
-          <View className="flex-1">
-            <AppText variant="h2" weight="bold">
-              {getGreeting()}, {DUMMY_USER.name.split(' ')[0]}! 👋
-            </AppText>
-            <AppText variant="body" color="secondary" className="mt-1">
-              What would you like to eat today?
-            </AppText>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      {!session && <GuestHeader />}
+      
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="px-4 pt-4 pb-2">
+          <View className="flex-row justify-between items-center mb-4">
+            <View className="flex-1">
+              <AppText variant="h2" weight="bold">
+                {getGreeting()}, {getUserName()}! 👋
+              </AppText>
+              <AppText variant="body" color="secondary" className="mt-1">
+                {session ? 'What would you like to eat today?' : 'Explore our healthy meals'}
+              </AppText>
+            </View>
+            <Pressable className="w-10 h-10 bg-primary rounded-full items-center justify-center">
+              <AppText variant="body" color="white">🛒</AppText>
+            </Pressable>
           </View>
-          <Pressable className="w-10 h-10 bg-primary rounded-full items-center justify-center">
-            <AppText variant="body" color="white">🛒</AppText>
-          </Pressable>
-        </View>
 
         {/* Search Bar */}
         <View className="flex-row items-center bg-background-secondary rounded-2xl px-4 py-3 mb-4">
@@ -155,10 +209,7 @@ export function HomeScreen() {
             <View key={meal.id} className="w-[48%] mb-4">
               <MealCard
                 meal={meal}
-                onPress={() => {
-                  // TODO: Navigate to meal detail
-                  console.log('Navigate to meal detail:', meal.name);
-                }}
+                onPress={() => handleMealPress(meal)}
                 onAddToCart={() => handleAddToCart(meal)}
                 onFavorite={() => handleFavorite(meal.id)}
                 isFavorite={favorites.includes(meal.id)}
@@ -177,7 +228,24 @@ export function HomeScreen() {
             </AppText>
           </View>
         )}
-      </View>
-    </ScrollView>
-  );
-}
+        </View>
+      </ScrollView>
+
+      <AuthPrompt
+        visible={authPromptVisible}
+        onClose={() => setAuthPromptVisible(false)}
+        title={authPromptConfig.title}
+        description={authPromptConfig.description}
+        actionText={authPromptConfig.actionText}
+        onAction={() => setAuthPromptVisible(false)}
+      />
+
+        <MealDetailBottomSheet
+          visible={bottomSheetVisible}
+          meal={selectedMeal}
+          onClose={handleCloseBottomSheet}
+          onAddToCart={handleAddToCart}
+        />
+      </SafeAreaView>
+    );
+  }

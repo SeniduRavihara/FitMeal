@@ -1,5 +1,6 @@
 import { View, ScrollView } from "react-native";
 import React from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { Card } from "../components/common/Card";
 import { Button } from "../components/Button";
@@ -12,7 +13,8 @@ export function SubscriptionsScreen() {
   };
 
   return (
-    <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+      <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
       {/* Header */}
       <View className="px-4 pt-4 pb-2">
         <AppText variant="h2" weight="bold" className="mb-2">
@@ -139,5 +141,6 @@ export function SubscriptionsScreen() {
         </Card>
       </View>
     </ScrollView>
+    </SafeAreaView>
   );
 }
