@@ -13,6 +13,7 @@ import AuthPrompt from "../components/AuthPrompt";
 import MealDetailBottomSheet from "../components/meal/MealDetailBottomSheet";
 import FeaturedCarousel from "../components/FeaturedCarousel";
 import { Ionicons } from "@expo/vector-icons";
+import { useCarousel } from "../hooks/useCarousel";
 
 export function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -28,6 +29,7 @@ export function HomeScreen() {
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   
   const { session } = useAuth();
+  const { carouselItems, loading: carouselLoading, error: carouselError } = useCarousel();
 
   const filteredMeals = DUMMY_MEALS.filter(meal => {
     const matchesCategory = selectedCategory === 'all' || meal.category === selectedCategory;
@@ -92,10 +94,47 @@ export function HomeScreen() {
     return 'Guest';
   };
 
-  // Featured carousel items - optimized content
-  const featuredItems = [
+  const handleCarouselAction = (item: any) => {
+    switch (item.actionType) {
+      case 'meal':
+        // Find the meal by ID and show detail
+        const meal = DUMMY_MEALS.find(m => m.id === item.actionValue);
+        if (meal) {
+          handleMealPress(meal);
+        }
+        break;
+      case 'category':
+        // Filter by category
+        setSelectedCategory(item.actionValue);
+        break;
+      case 'external':
+        // Open external URL (would use Linking.openURL in real app)
+        console.log('Open external URL:', item.actionValue);
+        break;
+      default:
+        console.log('Unknown action type:', item.actionType);
+    }
+  };
+
+  // Transform API carousel items to match FeaturedCarousel component format
+  const featuredItems = carouselItems.map(item => ({
+    id: item.id,
+    title: item.title,
+    subtitle: item.subtitle,
+    description: item.description,
+    image: item.image,
+    price: item.price,
+    originalPrice: item.originalPrice,
+    discount: item.discount,
+    backgroundColor: item.backgroundColor,
+    textColor: item.textColor,
+    onPress: () => handleCarouselAction(item)
+  }));
+
+  // Fallback carousel items when API is loading or fails
+  const fallbackCarouselItems = [
     {
-      id: '1',
+      id: 'fallback-1',
       title: 'Flash Sale',
       subtitle: 'Premium Meals',
       description: 'Limited time',
@@ -108,7 +147,7 @@ export function HomeScreen() {
       onPress: () => handleAddToCart(DUMMY_MEALS[0])
     },
     {
-      id: '2',
+      id: 'fallback-2',
       title: 'New Launch',
       subtitle: 'Protein Bowls',
       description: 'High protein',
@@ -117,30 +156,6 @@ export function HomeScreen() {
       backgroundColor: '#10B981',
       textColor: '#FFFFFF',
       onPress: () => handleAddToCart(DUMMY_MEALS[1] || DUMMY_MEALS[0])
-    },
-    {
-      id: '3',
-      title: 'Weekend Deal',
-      subtitle: 'Family Pack',
-      description: 'For families',
-      image: DUMMY_MEALS[2]?.image || DUMMY_MEALS[0].image,
-      price: 89.99,
-      originalPrice: 119.99,
-      discount: 'SAVE $30',
-      backgroundColor: '#8B5CF6',
-      textColor: '#FFFFFF',
-      onPress: () => handleAddToCart(DUMMY_MEALS[2] || DUMMY_MEALS[0])
-    },
-    {
-      id: '4',
-      title: 'Healthy Choice',
-      subtitle: 'Keto Meals',
-      description: 'Low carb',
-      image: DUMMY_MEALS[3]?.image || DUMMY_MEALS[0].image,
-      price: 34.99,
-      backgroundColor: '#F59E0B',
-      textColor: '#FFFFFF',
-      onPress: () => handleAddToCart(DUMMY_MEALS[3] || DUMMY_MEALS[0])
     }
   ];
 
@@ -210,7 +225,19 @@ export function HomeScreen() {
       </View>
 
       {/* Featured Carousel */}
-      <FeaturedCarousel items={featuredItems} />
+      {carouselError && __DEV__ && (
+        <View className="px-6 mb-2">
+          <AppText className="text-xs text-gray-400 text-center">
+            Using fallback carousel items (API: {carouselError})
+          </AppText>
+        </View>
+      )}
+      <FeaturedCarousel 
+        items={carouselLoading || carouselError || featuredItems.length === 0 
+          ? fallbackCarouselItems 
+          : featuredItems
+        } 
+      />
 
       {/* Meals Grid */}
       <View className="px-6 pb-6">

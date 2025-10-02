@@ -17,6 +17,7 @@ import {
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: HomeIcon },
   { name: 'Meals', href: '/admin/meals', icon: ShoppingBagIcon },
+  { name: 'Carousel', href: '/admin/carousel', icon: ChartBarIcon },
   { name: 'Orders', href: '/admin/orders', icon: ChartBarIcon },
   { name: 'Users', href: '/admin/users', icon: UserGroupIcon },
   { name: 'Subscriptions', href: '/admin/subscriptions', icon: CalendarIcon },

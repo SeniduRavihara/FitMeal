@@ -51,202 +51,481 @@ const orders = [
     customer: 'Mike Chen',
     email: 'mike.chen@email.com',
     items: [
-      { name: 'Keto Beef Stir-Fry', quantity: 4, price: 16.99 },
+      { name: 'Keto Beef Bowl', quantity: 1, price: 16.99 },
+      { name: 'Protein Smoothie', quantity: 2, price: 8.99 },
     ],
-    total: 67.96,
-    deliveryFee: 0,
-    tax: 5.44,
-    grandTotal: 73.40,
-    status: 'out_for_delivery',
-    paymentMethod: 'PayPal',
-    deliveryAddress: '789 Pine Street, San Francisco, CA 94104',
-    orderDate: '2024-01-20T16:00:00',
-    deliveryDate: null,
-  },
-  {
-    id: 'ORD-004',
-    customer: 'Emma Davis',
-    email: 'emma.davis@email.com',
-    items: [
-      { name: 'Grilled Chicken & Quinoa Bowl', quantity: 1, price: 14.99 },
-    ],
-    total: 14.99,
+    total: 34.97,
     deliveryFee: 2.99,
-    tax: 1.44,
-    grandTotal: 19.42,
-    status: 'cancelled',
-    paymentMethod: 'Visa **** 9012',
-    deliveryAddress: '321 Elm Street, San Francisco, CA 94105',
-    orderDate: '2024-01-20T15:10:00',
+    tax: 3.20,
+    grandTotal: 41.16,
+    status: 'confirmed',
+    paymentMethod: 'Apple Pay',
+    deliveryAddress: '789 Pine Street, San Francisco, CA 94104',
+    orderDate: '2024-01-20T16:45:00',
     deliveryDate: null,
   },
 ];
 
-const statusConfig = {
-  pending: {
-    icon: ClockIcon,
-    color: 'text-yellow-600',
-    bgColor: 'bg-yellow-100',
-    label: 'Pending',
+const styles = {
+  container: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '1.5rem',
   },
-  confirmed: {
-    icon: CheckCircleIcon,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
-    label: 'Confirmed',
+  header: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '1rem',
   },
-  preparing: {
-    icon: ClockIcon,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
-    label: 'Preparing',
+  filters: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
   },
-  out_for_delivery: {
-    icon: TruckIcon,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
-    label: 'Out for Delivery',
+  input: {
+    display: 'block',
+    width: '16rem',
+    padding: '0.5rem 0.75rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '0.375rem',
+    fontSize: '0.875rem',
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
   },
-  delivered: {
-    icon: CheckCircleIcon,
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
-    label: 'Delivered',
+  select: {
+    display: 'block',
+    padding: '0.5rem 0.75rem',
+    border: '1px solid #d1d5db',
+    borderRadius: '0.375rem',
+    fontSize: '0.875rem',
+    color: '#111827',
+    backgroundColor: '#ffffff',
+    cursor: 'pointer',
   },
-  cancelled: {
-    icon: XCircleIcon,
-    color: 'text-red-600',
-    bgColor: 'bg-red-100',
-    label: 'Cancelled',
+  tableContainer: {
+    backgroundColor: 'white',
+    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+    borderRadius: '0.375rem',
+    overflow: 'hidden',
+  },
+  table: {
+    minWidth: '100%',
+    borderCollapse: 'collapse' as const,
+  },
+  tableHeader: {
+    backgroundColor: '#f9fafb',
+  },
+  tableHeaderCell: {
+    padding: '0.75rem 1.5rem',
+    textAlign: 'left' as const,
+    fontSize: '0.75rem',
+    fontWeight: '500',
+    color: '#6b7280',
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.05em',
+    borderBottom: '1px solid #e5e7eb',
+  },
+  tableRow: {
+    borderBottom: '1px solid #e5e7eb',
+  },
+  tableCell: {
+    padding: '1rem 1.5rem',
+    fontSize: '0.875rem',
+    color: '#111827',
+    verticalAlign: 'top' as const,
+  },
+  badge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '0.25rem 0.5rem',
+    borderRadius: '9999px',
+    fontSize: '0.75rem',
+    fontWeight: '500',
+  },
+  pendingBadge: {
+    backgroundColor: '#fef3c7',
+    color: '#92400e',
+  },
+  confirmedBadge: {
+    backgroundColor: '#dbeafe',
+    color: '#1e40af',
+  },
+  preparingBadge: {
+    backgroundColor: '#e0e7ff',
+    color: '#3730a3',
+  },
+  deliveredBadge: {
+    backgroundColor: '#dcfce7',
+    color: '#166534',
+  },
+  cancelledBadge: {
+    backgroundColor: '#fee2e2',
+    color: '#991b1b',
+  },
+  iconButton: {
+    padding: '0.25rem',
+    color: '#6b7280',
+    cursor: 'pointer',
+    border: 'none',
+    backgroundColor: 'transparent',
+    marginRight: '0.5rem',
+  },
+  customerInfo: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  customerName: {
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#111827',
+  },
+  customerEmail: {
+    fontSize: '0.875rem',
+    color: '#6b7280',
+  },
+  itemsList: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: '0.25rem',
+  },
+  item: {
+    fontSize: '0.875rem',
+    color: '#111827',
+  },
+  itemQuantity: {
+    color: '#6b7280',
+  },
+  priceInfo: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  totalPrice: {
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    color: '#111827',
+  },
+  grandTotal: {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+  },
+  dateInfo: {
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+  orderDate: {
+    fontSize: '0.875rem',
+    color: '#111827',
+  },
+  deliveryDate: {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+  },
+  actions: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
   },
 };
 
 export default function OrderManagement() {
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const filteredOrders = selectedStatus === 'all' 
-    ? orders 
-    : orders.filter(order => order.status === selectedStatus);
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { style: styles.pendingBadge, icon: ClockIcon, text: 'Pending' },
+      confirmed: { style: styles.confirmedBadge, icon: CheckCircleIcon, text: 'Confirmed' },
+      preparing: { style: styles.preparingBadge, icon: ClockIcon, text: 'Preparing' },
+      delivered: { style: styles.deliveredBadge, icon: TruckIcon, text: 'Delivered' },
+      cancelled: { style: styles.cancelledBadge, icon: XCircleIcon, text: 'Cancelled' },
+    };
+
+    const config = statusConfig[status] || statusConfig.pending;
+    const Icon = config.icon;
+
+    return (
+      <span style={{ ...styles.badge, ...config.style }}>
+        <Icon style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.25rem' }} />
+        {config.text}
+      </span>
+    );
+  };
+
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = 
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.email.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const formatPrice = (price: number) => {
+    return `$${price.toFixed(2)}`;
+  };
 
   return (
-    <div className="space-y-6">
+    <div style={styles.container}>
       {/* Filters */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
+      <div style={styles.header}>
+        <div style={styles.filters}>
+          <input
+            type="text"
+            placeholder="Search orders, customers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={styles.input}
+          />
           <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            style={styles.select}
           >
-            <option value="all">All Orders</option>
+            <option value="all">All Status</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
             <option value="preparing">Preparing</option>
-            <option value="out_for_delivery">Out for Delivery</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
           </select>
-          <span className="text-sm text-gray-500">
-            {filteredOrders.length} orders
-          </span>
-        </div>
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Search orders..."
-            className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-          />
         </div>
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Items
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order Date
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
+      <div style={styles.tableContainer}>
+        <table style={styles.table}>
+          <thead style={styles.tableHeader}>
+            <tr>
+              <th style={styles.tableHeaderCell}>Order ID</th>
+              <th style={styles.tableHeaderCell}>Customer</th>
+              <th style={styles.tableHeaderCell}>Items</th>
+              <th style={styles.tableHeaderCell}>Total</th>
+              <th style={styles.tableHeaderCell}>Status</th>
+              <th style={styles.tableHeaderCell}>Order Date</th>
+              <th style={styles.tableHeaderCell}>Delivery</th>
+              <th style={styles.tableHeaderCell}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map((order) => (
+              <tr key={order.id} style={styles.tableRow}>
+                <td style={styles.tableCell}>
+                  <div style={{ fontWeight: '500', color: '#2563eb' }}>
+                    {order.id}
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.customerInfo}>
+                    <div style={styles.customerName}>{order.customer}</div>
+                    <div style={styles.customerEmail}>{order.email}</div>
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.itemsList}>
+                    {order.items.map((item, index) => (
+                      <div key={index} style={styles.item}>
+                        {item.name} <span style={styles.itemQuantity}>x{item.quantity}</span>
+                      </div>
+                    ))}
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.priceInfo}>
+                    <div style={styles.totalPrice}>{formatPrice(order.total)}</div>
+                    <div style={styles.grandTotal}>
+                      Total: {formatPrice(order.grandTotal)}
+                    </div>
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  {getStatusBadge(order.status)}
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.dateInfo}>
+                    <div style={styles.orderDate}>
+                      {formatDate(order.orderDate)}
+                    </div>
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.dateInfo}>
+                    {order.deliveryDate ? (
+                      <div style={styles.deliveryDate}>
+                        {formatDate(order.deliveryDate)}
+                      </div>
+                    ) : (
+                      <div style={{ ...styles.deliveryDate, fontStyle: 'italic' }}>
+                        Pending
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td style={styles.tableCell}>
+                  <div style={styles.actions}>
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      style={{ ...styles.iconButton, color: '#2563eb' }}
+                      title="View Details"
+                    >
+                      <EyeIcon style={{ width: '1rem', height: '1rem' }} />
+                    </button>
+                    <button
+                      onClick={() => console.log('Edit order:', order.id)}
+                      style={{ ...styles.iconButton, color: '#7c3aed' }}
+                      title="Edit Order"
+                    >
+                      <PencilIcon style={{ width: '1rem', height: '1rem' }} />
+                    </button>
+                  </div>
+                </td>
               </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredOrders.map((order) => {
-                const status = statusConfig[order.status as keyof typeof statusConfig];
-                const StatusIcon = status.icon;
-                
-                return (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {order.id}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{order.customer}</div>
-                        <div className="text-sm text-gray-500">{order.email}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {order.items[0].name}
-                        {order.items.length > 1 && ` +${order.items.length - 1} more`}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      ${order.grandTotal.toFixed(2)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${status.bgColor} ${status.color}`}>
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {status.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(order.orderDate).toLocaleDateString()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
-                          <EyeIcon className="h-4 w-4" />
-                        </button>
-                        <button className="text-indigo-600 hover:text-indigo-900">
-                          <PencilIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
+
+      {filteredOrders.length === 0 && (
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '3rem 0',
+          color: '#6b7280'
+        }}>
+          <ClockIcon style={{ width: '3rem', height: '3rem', marginBottom: '1rem' }} />
+          <div style={{ fontSize: '1.125rem', fontWeight: '500', marginBottom: '0.5rem' }}>
+            No orders found
+          </div>
+          <div style={{ fontSize: '0.875rem' }}>
+            Try adjusting your search or filter criteria
+          </div>
+        </div>
+      )}
+
+      {/* Order Details Modal */}
+      {selectedOrder && (
+        <div style={{
+          position: 'fixed',
+          inset: '0',
+          backgroundColor: 'rgba(75, 85, 99, 0.5)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '0.5rem',
+            padding: '1.5rem',
+            maxWidth: '32rem',
+            width: '90%',
+            maxHeight: '80vh',
+            overflowY: 'auto',
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '1rem',
+            }}>
+              <h3 style={{
+                fontSize: '1.25rem',
+                fontWeight: '600',
+                color: '#111827',
+              }}>
+                Order Details - {selectedOrder.id}
+              </h3>
+              <button
+                onClick={() => setSelectedOrder(null)}
+                style={{
+                  padding: '0.25rem',
+                  color: '#6b7280',
+                  cursor: 'pointer',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Customer Information</h4>
+                <p>{selectedOrder.customer}</p>
+                <p style={{ color: '#6b7280' }}>{selectedOrder.email}</p>
+                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
+                  {selectedOrder.deliveryAddress}
+                </p>
+              </div>
+
+              <div>
+                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Order Items</h4>
+                {selectedOrder.items.map((item, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    padding: '0.5rem 0',
+                    borderBottom: index < selectedOrder.items.length - 1 ? '1px solid #e5e7eb' : 'none',
+                  }}>
+                    <span>{item.name} x{item.quantity}</span>
+                    <span>{formatPrice(item.price * item.quantity)}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div>
+                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Payment Summary</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span>Subtotal:</span>
+                  <span>{formatPrice(selectedOrder.total)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span>Delivery Fee:</span>
+                  <span>{formatPrice(selectedOrder.deliveryFee)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span>Tax:</span>
+                  <span>{formatPrice(selectedOrder.tax)}</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontWeight: '600',
+                  borderTop: '1px solid #e5e7eb',
+                  paddingTop: '0.5rem',
+                }}>
+                  <span>Total:</span>
+                  <span>{formatPrice(selectedOrder.grandTotal)}</span>
+                </div>
+              </div>
+
+              <div>
+                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Order Status</h4>
+                {getStatusBadge(selectedOrder.status)}
+                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+                  Payment Method: {selectedOrder.paymentMethod}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
-
-
-
-
-
