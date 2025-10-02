@@ -166,7 +166,7 @@ export function HomeScreen() {
           </View>
 
         {/* Search Bar */}
-        <View className="flex-row items-center bg-white rounded-2xl px-4 py-4 mb-6 shadow-sm">
+        <View className="flex-row items-center bg-white rounded-2xl px-4 py-2 mb-6 shadow-sm">
           <Ionicons name="search-outline" size={20} color="#9CA3AF" className="mr-3" />
           <TextInput
             placeholder="Search meals, ingredients..."
