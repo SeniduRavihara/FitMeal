@@ -1,11 +1,28 @@
-'use client';
+"use client";
 
-import { BellIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { useSidebar } from "@/context/SidebarContext";
+import {
+  Bars3Icon,
+  BellIcon,
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
 
 export default function AdminHeader() {
+  const { toggleSidebar } = useSidebar();
+
   return (
     <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
       <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+        {/* Mobile menu button */}
+        <button
+          type="button"
+          className="lg:hidden -m-2.5 p-2.5 text-gray-400 hover:text-gray-600 transition-colors"
+          onClick={toggleSidebar}
+        >
+          <span className="sr-only">Open sidebar</span>
+          <Bars3Icon className="h-6 w-6" />
+        </button>
+
         <div className="flex flex-1"></div>
         <div className="flex items-center gap-x-4 lg:gap-x-6">
           {/* Notifications */}
@@ -32,8 +49,3 @@ export default function AdminHeader() {
     </div>
   );
 }
-
-
-
-
-
