@@ -59,7 +59,6 @@ export default function AuthPrompt({
     </Modal>
   )
 }
-
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -124,3 +123,4 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 })
+

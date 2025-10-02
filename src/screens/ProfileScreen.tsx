@@ -1,13 +1,10 @@
-import { View, ScrollView, Pressable, Image } from "react-native";
+import { View, ScrollView, Pressable, Image, TouchableOpacity } from "react-native";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
-import { Card } from "../components/common/Card";
-import { Button } from "../components/Button";
-import { DUMMY_USER, DUMMY_USER_SUBSCRIPTION } from "../data/dummyData";
-import { FITNESS_GOALS } from "../constants";
 import { useAuth } from "../contexts/AuthContext";
 import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 export function ProfileScreen() {
   const { session, signOut } = useAuth();
@@ -29,282 +26,182 @@ export function ProfileScreen() {
     }
   };
 
-  const userGoal = FITNESS_GOALS.find(goal => goal.id === DUMMY_USER.fitnessGoal);
-
   // Show sign-in screen for guests
   if (!session) {
     return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
-        <View className="flex-1 bg-background justify-center items-center px-6">
-        <View className="items-center space-y-6">
-          <View className="w-20 h-20 bg-primary-50 rounded-full items-center justify-center">
-            <AppText variant="h1">👤</AppText>
-          </View>
-          
-          <View className="items-center space-y-2">
-            <AppText variant="h2" weight="bold" center>
-              Welcome Back!
-            </AppText>
-            <AppText variant="body" color="secondary" center>
-              Sign in to view your profile and orders
-            </AppText>
-          </View>
+      <SafeAreaView className="flex-1 bg-white">
+        <View className="flex-1 justify-center items-center px-6">
+          <View className="items-center space-y-6">
+            <View className="w-20 h-20 bg-orange-100 rounded-full items-center justify-center">
+              <Ionicons name="person-outline" size={32} color="#FB923C" />
+            </View>
+            
+            <View className="items-center space-y-2">
+              <AppText variant="h2" weight="bold" className="text-gray-900 text-center">
+                Welcome Back!
+              </AppText>
+              <AppText variant="body" className="text-gray-500 text-center">
+                Sign in to view your profile and orders
+              </AppText>
+            </View>
 
-          <View className="w-full space-y-3">
-            <Button
-              title="Sign In"
-              onPress={() => router.push('/(auth)/sign-in')}
-            />
-            <Button
-              title="Create Account"
-              variant="outline"
-              onPress={() => router.push('/(auth)/sign-up')}
-            />
-          </View>
+            <View className="w-full space-y-3">
+              <TouchableOpacity 
+                className="bg-orange-500 py-4 px-6 rounded-xl"
+                onPress={() => router.push('/(auth)/sign-in')}
+              >
+                <AppText className="text-white text-center font-semibold">Sign In</AppText>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                className="border border-orange-200 py-4 px-6 rounded-xl"
+                onPress={() => router.push('/(auth)/sign-up')}
+              >
+                <AppText className="text-orange-500 text-center font-semibold">Create Account</AppText>
+              </TouchableOpacity>
+            </View>
 
-          <Pressable onPress={() => router.back()}>
-            <AppText variant="body" color="secondary">
-              Continue Browsing
-        </AppText>
-      </Pressable>
-    </View>
-  </View>
-  </SafeAreaView>
-);
+            <TouchableOpacity onPress={() => router.back()}>
+              <AppText className="text-gray-400">
+                Continue Browsing
+              </AppText>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
-      <ScrollView className="flex-1 bg-background" showsVerticalScrollIndicator={false}>
-      {/* Header */}
-      <View className="px-4 pt-4 pb-2">
-        <AppText variant="h2" weight="bold" className="mb-2">
-          Profile
-        </AppText>
-      </View>
-
-      {/* User Info Card */}
-      <View className="px-4 py-4">
-        <Card>
-          <View className="items-center space-y-4">
-            <Image
-              source={{ uri: DUMMY_USER.avatar }}
-              className="w-20 h-20 rounded-full"
-              resizeMode="cover"
-            />
-            
-            <View className="items-center">
-              <AppText variant="h3" weight="bold">
-                {DUMMY_USER.name}
-              </AppText>
-              <AppText variant="body" color="secondary">
-                {DUMMY_USER.email}
-              </AppText>
-            </View>
-
-            <View className="flex-row items-center bg-primary-50 px-3 py-2 rounded-full">
-              <AppText variant="body" className="mr-2">
-                {userGoal?.icon}
-              </AppText>
-              <AppText variant="bodySmall" weight="medium" color="primary">
-                {userGoal?.name}
-              </AppText>
-            </View>
-
-            <Button
-              title="Edit Profile"
-              variant="outline"
-              size="small"
-              onPress={handleEditProfile}
-            />
-          </View>
-        </Card>
-      </View>
-
-      {/* Stats */}
-      <View className="px-4 pb-4">
-        <AppText variant="h3" weight="semibold" className="mb-3">
-          Your Stats
-        </AppText>
-        
-        <View className="flex-row space-x-3">
-          <Card className="flex-1">
-            <View className="items-center py-3">
-              <AppText variant="h2" weight="bold" color="primary">
-                12
-              </AppText>
-              <AppText variant="caption" color="secondary" center>
-                Orders This Month
-              </AppText>
-            </View>
-          </Card>
-          
-          <Card className="flex-1">
-            <View className="items-center py-3">
-              <AppText variant="h2" weight="bold" color="secondary">
-                2,340
-              </AppText>
-              <AppText variant="caption" color="secondary" center>
-                Calories Saved
-              </AppText>
-            </View>
-          </Card>
-          
-          <Card className="flex-1">
-            <View className="items-center py-3">
-              <AppText variant="h2" weight="bold" color="accent">
-                15
-              </AppText>
-              <AppText variant="caption" color="secondary" center>
-                Meals Remaining
-              </AppText>
-            </View>
-          </Card>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View className="px-6 pt-4 pb-6">
+          <AppText className="text-2xl font-bold text-gray-900 text-center">
+            Profile
+          </AppText>
         </View>
-      </View>
 
-      {/* Current Subscription */}
-      <View className="px-4 pb-4">
-        <AppText variant="h3" weight="semibold" className="mb-3">
-          Current Plan
-        </AppText>
-        
-        <Card>
-          <View className="space-y-3">
-            <View className="flex-row justify-between items-start">
-              <View className="flex-1">
-                <AppText variant="h4" weight="semibold">
-                  {DUMMY_USER_SUBSCRIPTION.subscription.name}
-                </AppText>
-                <AppText variant="body" color="secondary">
-                  {DUMMY_USER_SUBSCRIPTION.mealsRemaining} meals remaining
-                </AppText>
-              </View>
-              <View className="bg-secondary-50 px-2 py-1 rounded-md">
-                <AppText variant="caption" weight="semibold" color="secondary">
-                  {DUMMY_USER_SUBSCRIPTION.status.toUpperCase()}
-                </AppText>
-              </View>
+        {/* User Profile Section */}
+        <View className="items-center px-6 mb-8">
+          {/* Avatar */}
+          <View className="relative mb-4">
+            <View className="w-24 h-24 bg-orange-100 rounded-full items-center justify-center border-2 border-white shadow-sm">
+              <Ionicons name="person" size={40} color="#FB923C" />
             </View>
-            
-            <View className="flex-row justify-between items-center">
-              <AppText variant="bodySmall" color="secondary">
-                Next delivery: {DUMMY_USER_SUBSCRIPTION.nextDelivery.toLocaleDateString()}
-              </AppText>
-              <Button
-                title="Manage"
-                variant="outline"
-                size="small"
-                onPress={() => handleSettings('subscription')}
-              />
-            </View>
+            {/* Edit Icon */}
+            <TouchableOpacity 
+              className="absolute -bottom-1 -right-1 w-8 h-8 bg-orange-200 rounded-full items-center justify-center"
+              onPress={handleEditProfile}
+            >
+              <Ionicons name="pencil" size={14} color="#FB923C" />
+            </TouchableOpacity>
           </View>
-        </Card>
-      </View>
 
-      {/* Settings Menu */}
-      <View className="px-4 pb-6">
-        <AppText variant="h3" weight="semibold" className="mb-3">
-          Settings
-        </AppText>
-        
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('personal-info')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">👤</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Personal Information
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
-            </View>
-          </Pressable>
-        </Card>
+          {/* User Info */}
+          <View className="items-center mb-6">
+            <AppText className="text-xl font-bold text-gray-900 mb-1">
+              {session.user.user_metadata?.name || 'User'}
+            </AppText>
+            <AppText className="text-base text-gray-500 mb-1">
+              {session.user.phone || 'No phone number'}
+            </AppText>
+            <AppText className="text-base text-gray-500">
+              {session.user.email}
+            </AppText>
+          </View>
+        </View>
 
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('dietary-preferences')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">🥗</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Dietary Preferences
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+        {/* Menu Items */}
+        <View className="px-6 space-y-1">
+          {/* Order History */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={() => handleSettings('order-history')}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="time-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Order History
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
 
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('notifications')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">🔔</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Notification Settings
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+          {/* Shipping Address */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={() => handleSettings('shipping-address')}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="location-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Shipping Address
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
 
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('payment-methods')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">💳</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Payment Methods
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+          {/* Create Request */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={() => handleSettings('create-request')}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="document-text-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Create Request
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
 
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('order-history')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">📋</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Order History
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+          {/* Privacy Policy */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={() => handleSettings('privacy-policy')}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="lock-closed-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Privacy Policy
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
 
-        <Card className="mb-3">
-          <Pressable onPress={() => handleSettings('help-support')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">❓</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                Help & Support
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+          {/* Settings */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={() => handleSettings('settings')}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="settings-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Settings
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
 
-        <Card>
-          <Pressable onPress={() => handleSettings('about')} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">ℹ️</AppText>
-              <AppText variant="body" weight="medium" className="flex-1">
-                About
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
+          {/* Log out */}
+          <TouchableOpacity 
+            className="flex-row items-center py-4"
+            onPress={handleSignOut}
+          >
+            <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
+              <Ionicons name="log-out-outline" size={20} color="#FB923C" />
             </View>
-          </Pressable>
-        </Card>
+            <AppText className="flex-1 text-base text-gray-900 font-medium">
+              Log out
+            </AppText>
+            <Ionicons name="chevron-forward" size={20} color="#FB923C" />
+          </TouchableOpacity>
+        </View>
 
-        <Card className="mt-4">
-          <Pressable onPress={handleSignOut} className="py-3">
-            <View className="flex-row items-center">
-              <AppText variant="body" className="mr-3">🚪</AppText>
-              <AppText variant="body" weight="medium" color="red-500" className="flex-1">
-                Sign Out
-              </AppText>
-              <AppText variant="body" color="secondary">›</AppText>
-            </View>
-          </Pressable>
-        </Card>
-      </View>
-    </ScrollView>
+        {/* Bottom Spacing */}
+        <View className="h-20" />
+      </ScrollView>
     </SafeAreaView>
   );
 }

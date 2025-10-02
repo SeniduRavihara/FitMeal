@@ -161,7 +161,6 @@ export default function MealDetailBottomSheet({
     </Modal>
   )
 }
-
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
@@ -353,3 +352,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 })
+

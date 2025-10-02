@@ -25,7 +25,6 @@ export default function GuestHeader() {
     </View>
   )
 }
-
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
@@ -57,3 +56,4 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 })
+
