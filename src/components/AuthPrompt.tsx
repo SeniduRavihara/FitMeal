@@ -1,6 +1,8 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native'
+import { View, TouchableOpacity, Modal } from 'react-native'
 import { router } from 'expo-router'
+import { AppText } from './AppText'
+import { Ionicons } from '@expo/vector-icons'
 
 interface AuthPromptProps {
   visible: boolean
@@ -33,94 +35,54 @@ export default function AuthPrompt({
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="fade"
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <View style={styles.container}>
-          <Text style={styles.title}>{title}</Text>
-          <Text style={styles.description}>{description}</Text>
+      <View className="flex-1 bg-black/50 justify-center items-center px-6">
+        <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
+          {/* Icon */}
+          <View className="items-center mb-4">
+            <View className="w-16 h-16 bg-orange-100 rounded-full items-center justify-center">
+              <Ionicons name="lock-closed-outline" size={32} color="#FB923C" />
+            </View>
+          </View>
+
+          {/* Content */}
+          <View className="items-center mb-6">
+            <AppText className="text-xl font-bold text-gray-900 mb-2 text-center">
+              {title}
+            </AppText>
+            <AppText className="text-base text-gray-600 text-center leading-6">
+              {description}
+            </AppText>
+          </View>
           
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.primaryButton} onPress={handleSignIn}>
-              <Text style={styles.primaryButtonText}>Sign In</Text>
+          {/* Buttons */}
+          <View className="space-y-3 mb-4">
+            <TouchableOpacity 
+              className="bg-orange-500 py-4 rounded-xl"
+              onPress={handleSignIn}
+            >
+              <AppText className="text-white font-semibold text-center">Sign In</AppText>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.secondaryButton} onPress={handleSignUp}>
-              <Text style={styles.secondaryButtonText}>Create Account</Text>
+            <TouchableOpacity 
+              className="bg-gray-100 py-4 rounded-xl"
+              onPress={handleSignUp}
+            >
+              <AppText className="text-gray-700 font-semibold text-center">Create Account</AppText>
             </TouchableOpacity>
           </View>
           
-          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
-            <Text style={styles.cancelButtonText}>Maybe Later</Text>
+          <TouchableOpacity 
+            className="items-center py-2"
+            onPress={onClose}
+          >
+            <AppText className="text-gray-400 text-sm">Maybe Later</AppText>
           </TouchableOpacity>
         </View>
       </View>
     </Modal>
   )
 }
-const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  container: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
-    width: '100%',
-    maxWidth: 320,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#1f2937',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  description: {
-    fontSize: 16,
-    color: '#6b7280',
-    textAlign: 'center',
-    marginBottom: 24,
-    lineHeight: 22,
-  },
-  buttonContainer: {
-    marginBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  secondaryButton: {
-    backgroundColor: '#f3f4f6',
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  secondaryButtonText: {
-    color: '#374151',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  cancelButtonText: {
-    color: '#9ca3af',
-    fontSize: 14,
-  },
-})
 

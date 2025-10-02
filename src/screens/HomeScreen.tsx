@@ -1,4 +1,4 @@
-import { View, ScrollView, TextInput, Pressable, Image } from "react-native";
+import { View, ScrollView, TextInput, Pressable, Image, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
@@ -11,6 +11,8 @@ import { useAuth } from "../contexts/AuthContext";
 import GuestHeader from "../components/GuestHeader";
 import AuthPrompt from "../components/AuthPrompt";
 import MealDetailBottomSheet from "../components/meal/MealDetailBottomSheet";
+import FeaturedCarousel from "../components/FeaturedCarousel";
+import { Ionicons } from "@expo/vector-icons";
 
 export function HomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -90,116 +92,133 @@ export function HomeScreen() {
     return 'Guest';
   };
 
+  // Featured carousel items - optimized content
+  const featuredItems = [
+    {
+      id: '1',
+      title: 'Flash Sale',
+      subtitle: 'Premium Meals',
+      description: 'Limited time',
+      image: DUMMY_MEALS[0].image,
+      price: 49.99,
+      originalPrice: 69.99,
+      discount: '30% OFF',
+      backgroundColor: '#EF4444',
+      textColor: '#FFFFFF',
+      onPress: () => handleAddToCart(DUMMY_MEALS[0])
+    },
+    {
+      id: '2',
+      title: 'New Launch',
+      subtitle: 'Protein Bowls',
+      description: 'High protein',
+      image: DUMMY_MEALS[1]?.image || DUMMY_MEALS[0].image,
+      price: 24.99,
+      backgroundColor: '#10B981',
+      textColor: '#FFFFFF',
+      onPress: () => handleAddToCart(DUMMY_MEALS[1] || DUMMY_MEALS[0])
+    },
+    {
+      id: '3',
+      title: 'Weekend Deal',
+      subtitle: 'Family Pack',
+      description: 'For families',
+      image: DUMMY_MEALS[2]?.image || DUMMY_MEALS[0].image,
+      price: 89.99,
+      originalPrice: 119.99,
+      discount: 'SAVE $30',
+      backgroundColor: '#8B5CF6',
+      textColor: '#FFFFFF',
+      onPress: () => handleAddToCart(DUMMY_MEALS[2] || DUMMY_MEALS[0])
+    },
+    {
+      id: '4',
+      title: 'Healthy Choice',
+      subtitle: 'Keto Meals',
+      description: 'Low carb',
+      image: DUMMY_MEALS[3]?.image || DUMMY_MEALS[0].image,
+      price: 34.99,
+      backgroundColor: '#F59E0B',
+      textColor: '#FFFFFF',
+      onPress: () => handleAddToCart(DUMMY_MEALS[3] || DUMMY_MEALS[0])
+    }
+  ];
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#f8fafc' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
       {!session && <GuestHeader />}
       
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* Header */}
-        <View className="px-4 pt-4 pb-2">
-          <View className="flex-row justify-between items-center mb-4">
+        <View className="px-6 pt-4 pb-2">
+          <View className="flex-row justify-between items-center mb-6">
             <View className="flex-1">
-              <AppText variant="h2" weight="bold">
-                {getGreeting()}, {getUserName()}! 👋
+              <AppText className="text-2xl font-bold text-gray-900 mb-1">
+                {getGreeting()}, {getUserName()}!
               </AppText>
-              <AppText variant="body" color="secondary" className="mt-1">
+              <AppText className="text-base text-gray-500">
                 {session ? 'What would you like to eat today?' : 'Explore our healthy meals'}
               </AppText>
             </View>
-            <Pressable className="w-10 h-10 bg-primary rounded-full items-center justify-center">
-              <AppText variant="body" color="white">🛒</AppText>
-            </Pressable>
+            <TouchableOpacity className="w-12 h-12 bg-orange-500 rounded-full items-center justify-center shadow-sm">
+              <Ionicons name="bag-outline" size={20} color="#FFFFFF" />
+            </TouchableOpacity>
           </View>
 
         {/* Search Bar */}
-        <View className="flex-row items-center bg-background-secondary rounded-2xl px-4 py-3 mb-4">
-          <AppText variant="body" color="secondary" className="mr-3">🔍</AppText>
+        <View className="flex-row items-center bg-white rounded-2xl px-4 py-4 mb-6 shadow-sm">
+          <Ionicons name="search-outline" size={20} color="#9CA3AF" className="mr-3" />
           <TextInput
             placeholder="Search meals, ingredients..."
-            placeholderTextColor="#86868B"
+            placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            className="flex-1 text-base font-system"
+            className="flex-1 text-base text-gray-900 ml-3"
           />
         </View>
       </View>
 
       {/* Categories */}
-      <View className="px-4 mb-4">
+      <View className="px-6 mb-6">
         <ScrollView 
           horizontal 
           showsHorizontalScrollIndicator={false}
           className="flex-row"
         >
           {MEAL_CATEGORIES.map((category) => (
-            <Pressable
+            <TouchableOpacity
               key={category.id}
               onPress={() => setSelectedCategory(category.id)}
               className={`
-                mr-3 px-4 py-2 rounded-full border
+                mr-3 px-5 py-3 rounded-full
                 ${selectedCategory === category.id 
-                  ? 'bg-primary border-primary' 
-                  : 'bg-white border-border'
+                  ? 'bg-orange-500' 
+                  : 'bg-white border border-gray-200'
                 }
               `}
             >
-              <View className="flex-row items-center">
-                <AppText variant="body" className="mr-2">
-                  {category.icon}
-                </AppText>
-                <AppText 
-                  variant="bodySmall" 
-                  weight="medium"
-                  color={selectedCategory === category.id ? "white" : "primary"}
-                >
-                  {category.name}
-                </AppText>
-              </View>
-            </Pressable>
+              <AppText 
+                className={`text-sm font-medium ${
+                  selectedCategory === category.id ? 'text-white' : 'text-gray-700'
+                }`}
+              >
+                {category.name}
+              </AppText>
+            </TouchableOpacity>
           ))}
         </ScrollView>
       </View>
 
-      {/* Featured Meal */}
-      <View className="px-4 mb-6">
-        <AppText variant="h3" weight="semibold" className="mb-3">
-          Featured Today
-        </AppText>
-        <View className="bg-gradient-to-r from-primary to-secondary rounded-2xl p-4">
-          <View className="flex-row items-center">
-            <Image
-              source={{ uri: DUMMY_MEALS[0].image }}
-              className="w-16 h-16 rounded-xl mr-4"
-              resizeMode="cover"
-            />
-            <View className="flex-1">
-              <AppText variant="h4" weight="semibold" color="white">
-                {DUMMY_MEALS[0].name}
-              </AppText>
-              <AppText variant="bodySmall" color="white" className="opacity-90">
-                {DUMMY_MEALS[0].nutrition.calories} cal • {DUMMY_MEALS[0].nutrition.protein}g protein
-              </AppText>
-              <AppText variant="h3" weight="bold" color="white" className="mt-1">
-                ${DUMMY_MEALS[0].price.toFixed(2)}
-              </AppText>
-            </View>
-            <Button
-              title="Order"
-              variant="secondary"
-              size="small"
-              onPress={() => handleAddToCart(DUMMY_MEALS[0])}
-            />
-          </View>
-        </View>
-      </View>
+      {/* Featured Carousel */}
+      <FeaturedCarousel items={featuredItems} />
 
       {/* Meals Grid */}
-      <View className="px-4 pb-6">
-        <View className="flex-row justify-between items-center mb-4">
-          <AppText variant="h3" weight="semibold">
+      <View className="px-6 pb-6">
+        <View className="flex-row justify-between items-center mb-6">
+          <AppText className="text-xl font-bold text-gray-900">
             {selectedCategory === 'all' ? 'All Meals' : MEAL_CATEGORIES.find(c => c.id === selectedCategory)?.name}
           </AppText>
-          <AppText variant="bodySmall" color="secondary">
+          <AppText className="text-sm text-gray-500">
             {filteredMeals.length} meals
           </AppText>
         </View>
@@ -219,11 +238,12 @@ export function HomeScreen() {
         </View>
 
         {filteredMeals.length === 0 && (
-          <View className="items-center py-8">
-            <AppText variant="h4" weight="medium" color="secondary" center>
+          <View className="items-center py-12">
+            <Ionicons name="restaurant-outline" size={48} color="#D1D5DB" />
+            <AppText className="text-lg font-medium text-gray-500 mt-4 text-center">
               No meals found
             </AppText>
-            <AppText variant="body" color="tertiary" center className="mt-2">
+            <AppText className="text-base text-gray-400 text-center mt-2">
               Try adjusting your search or category filter
             </AppText>
           </View>

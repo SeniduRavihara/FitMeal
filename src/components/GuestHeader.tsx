@@ -1,7 +1,9 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, TouchableOpacity } from 'react-native'
 import { router } from 'expo-router'
 import { useAuth } from '../contexts/AuthContext'
+import { AppText } from './AppText'
+import { Ionicons } from '@expo/vector-icons'
 
 export default function GuestHeader() {
   const { session } = useAuth()
@@ -11,49 +13,21 @@ export default function GuestHeader() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.leftSection}>
-        <Text style={styles.guestText}>👤 Guest</Text>
+    <View className="flex-row justify-between items-center px-6 py-3 bg-white border-b border-gray-200">
+      <View className="flex-row items-center flex-1">
+        <View className="w-8 h-8 bg-gray-100 rounded-full items-center justify-center mr-3">
+          <Ionicons name="person-outline" size={16} color="#6B7280" />
+        </View>
+        <AppText className="text-sm font-medium text-gray-600">Guest</AppText>
       </View>
       
       <TouchableOpacity 
-        style={styles.signInButton}
+        className="bg-orange-500 px-4 py-2 rounded-lg"
         onPress={() => router.push('/(auth)/sign-in')}
       >
-        <Text style={styles.signInText}>Sign In</Text>
+        <AppText className="text-white text-sm font-semibold">Sign In</AppText>
       </TouchableOpacity>
     </View>
   )
 }
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#f8fafc',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  leftSection: {
-    flex: 1,
-  },
-  guestText: {
-    fontSize: 14,
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-  signInButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  signInText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-})
 
