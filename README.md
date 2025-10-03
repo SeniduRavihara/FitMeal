@@ -2,7 +2,7 @@
 
 A comprehensive fitness meal delivery mobile application built with **Expo** and **React Native**. Order healthy, nutritious meals tailored to your fitness goals directly from your mobile device.
 
-![FitMeal Mobile App](docs/Phone-mkocukp.png)
+![FitMeal Mobile App](docs/Phone-mockup.png)
 
 ## ✨ Features
 
