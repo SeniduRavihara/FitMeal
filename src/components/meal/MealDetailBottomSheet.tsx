@@ -52,15 +52,20 @@ export default function MealDetailBottomSheet({
       transparent
       animationType="slide"
       onRequestClose={onClose}
+      statusBarTranslucent={true}
+      presentationStyle="overFullScreen"
     >
-      <View className="flex-1 justify-end bg-black/30">
+      <View
+        style={{ flex: 1, backgroundColor: "rgba(0, 0, 0, 0.3)" }}
+        className="justify-end"
+      >
         <TouchableOpacity
           className="absolute inset-0"
           activeOpacity={1}
           onPress={onClose}
         />
 
-        <View className="bg-white rounded-t-3xl max-h-[90%] min-h-[50%]">
+        <View className="bg-white rounded-t-3xl h-[85%]">
           {/* Handle */}
           <View className="w-10 h-1 bg-gray-300 rounded-full self-center mt-2 mb-2" />
 
