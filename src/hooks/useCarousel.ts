@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { CarouselItem } from '../types/carousel';
-import { CarouselApi } from '../services/carouselApi';
+import { useEffect, useState } from "react";
+import { CarouselApi } from "../supabase/services/carouselApi";
+import { CarouselItem } from "../types/carousel";
 
 export function useCarousel() {
   const [carouselItems, setCarouselItems] = useState<CarouselItem[]>([]);
@@ -13,9 +13,13 @@ export function useCarousel() {
       setError(null);
       const items = await CarouselApi.getActiveCarouselItems();
       setCarouselItems(items);
+      console.log("items", items);
+      
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load carousel items');
-      console.error('Error fetching carousel items:', err);
+      setError(
+        err instanceof Error ? err.message : "Failed to load carousel items"
+      );
+      console.error("Error fetching carousel items:", err);
     } finally {
       setLoading(false);
     }
@@ -50,8 +54,10 @@ export function useCarouselItem(id: string) {
         const item = await CarouselApi.getCarouselItemById(id);
         setCarouselItem(item);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load carousel item');
-        console.error('Error fetching carousel item:', err);
+        setError(
+          err instanceof Error ? err.message : "Failed to load carousel item"
+        );
+        console.error("Error fetching carousel item:", err);
       } finally {
         setLoading(false);
       }

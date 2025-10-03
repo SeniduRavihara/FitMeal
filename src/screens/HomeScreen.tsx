@@ -29,7 +29,6 @@ export function HomeScreen() {
   const [bottomSheetVisible, setBottomSheetVisible] = useState(false);
   
   const { session } = useAuth();
-  const { carouselItems, loading: carouselLoading, error: carouselError } = useCarousel();
 
   const filteredMeals = DUMMY_MEALS.filter(meal => {
     const matchesCategory = selectedCategory === 'all' || meal.category === selectedCategory;
@@ -117,47 +116,47 @@ export function HomeScreen() {
   };
 
   // Transform API carousel items to match FeaturedCarousel component format
-  const featuredItems = carouselItems.map(item => ({
-    id: item.id,
-    title: item.title,
-    subtitle: item.subtitle,
-    description: item.description,
-    image: item.image,
-    price: item.price,
-    originalPrice: item.originalPrice,
-    discount: item.discount,
-    backgroundColor: item.backgroundColor,
-    textColor: item.textColor,
-    onPress: () => handleCarouselAction(item)
-  }));
+  // const featuredItems = carouselItems.map(item => ({
+  //   id: item.id,
+  //   title: item.title,
+  //   subtitle: item.subtitle,
+  //   description: item.description,
+  //   image: item.image,
+  //   price: item.price,
+  //   originalPrice: item.originalPrice,
+  //   discount: item.discount,
+  //   backgroundColor: item.backgroundColor,
+  //   textColor: item.textColor,
+  //   onPress: () => handleCarouselAction(item)
+  // }));
 
   // Fallback carousel items when API is loading or fails
-  const fallbackCarouselItems = [
-    {
-      id: 'fallback-1',
-      title: 'Flash Sale',
-      subtitle: 'Premium Meals',
-      description: 'Limited time',
-      image: DUMMY_MEALS[0].image,
-      price: 49.99,
-      originalPrice: 69.99,
-      discount: '30% OFF',
-      backgroundColor: '#EF4444',
-      textColor: '#FFFFFF',
-      onPress: () => handleAddToCart(DUMMY_MEALS[0])
-    },
-    {
-      id: 'fallback-2',
-      title: 'New Launch',
-      subtitle: 'Protein Bowls',
-      description: 'High protein',
-      image: DUMMY_MEALS[1]?.image || DUMMY_MEALS[0].image,
-      price: 24.99,
-      backgroundColor: '#10B981',
-      textColor: '#FFFFFF',
-      onPress: () => handleAddToCart(DUMMY_MEALS[1] || DUMMY_MEALS[0])
-    }
-  ];
+  // const fallbackCarouselItems = [
+  //   {
+  //     id: 'fallback-1',
+  //     title: 'Flash Sale',
+  //     subtitle: 'Premium Meals',
+  //     description: 'Limited time',
+  //     image: DUMMY_MEALS[0].image,
+  //     price: 49.99,
+  //     originalPrice: 69.99,
+  //     discount: '30% OFF',
+  //     backgroundColor: '#EF4444',
+  //     textColor: '#FFFFFF',
+  //     onPress: () => handleAddToCart(DUMMY_MEALS[0])
+  //   },
+  //   {
+  //     id: 'fallback-2',
+  //     title: 'New Launch',
+  //     subtitle: 'Protein Bowls',
+  //     description: 'High protein',
+  //     image: DUMMY_MEALS[1]?.image || DUMMY_MEALS[0].image,
+  //     price: 24.99,
+  //     backgroundColor: '#10B981',
+  //     textColor: '#FFFFFF',
+  //     onPress: () => handleAddToCart(DUMMY_MEALS[1] || DUMMY_MEALS[0])
+  //   }
+  // ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#FAFAFA' }}>
@@ -225,19 +224,14 @@ export function HomeScreen() {
       </View>
 
       {/* Featured Carousel */}
-      {carouselError && __DEV__ && (
+      {/* {carouselError && __DEV__ && (
         <View className="px-6 mb-2">
           <AppText className="text-xs text-gray-400 text-center">
             Using fallback carousel items (API: {carouselError})
           </AppText>
         </View>
-      )}
-      <FeaturedCarousel 
-        items={carouselLoading || carouselError || featuredItems.length === 0 
-          ? fallbackCarouselItems 
-          : featuredItems
-        } 
-      />
+      )} */}
+      <FeaturedCarousel />
 
       {/* Meals Grid */}
       <View className="px-6 pb-6">

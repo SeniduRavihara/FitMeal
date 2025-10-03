@@ -6,10 +6,12 @@ import {
   TouchableOpacity, 
   Dimensions,
   NativeSyntheticEvent,
-  NativeScrollEvent
+  NativeScrollEvent,
+  ActivityIndicator
 } from 'react-native'
 import { AppText } from './AppText'
 import { Ionicons } from '@expo/vector-icons'
+import { AddService } from '@/supabase/services/AddService'
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window')
 const CARD_WIDTH = SCREEN_WIDTH - 48 // 24px padding on each side
@@ -33,15 +35,47 @@ interface FeaturedCarouselProps {
   items: FeaturedItem[]
 }
 
-export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
+export default function FeaturedCarousel() {
   const scrollViewRef = useRef<ScrollView>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [carouselItems, setCarouselItems] = useState<FeaturedItem[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchCarouselItems = async () => {
+      try {
+      const { data, error } = await AddService.getCarouselItem()
+      if (error) {
+        console.error("Error fetching carousel items:", error)
+      } else {
+        setCarouselItems(data?.map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          subtitle: item.subtitle,
+          description: item.description,
+          image: item.image_url,
+          price: item.price,
+          originalPrice: item.original_price,
+          discount: item.discount,
+          backgroundColor: item.background_color,
+          textColor: item.text_color,
+          onPress: () => console.log("item", item)
+        })) || [])
+        setLoading(false)
+      }
+    } catch (error) {
+      console.error("Error fetching carousel items:", error)
+    }
+    }
+    fetchCarouselItems()
+  }, [])
+
 
   // Auto-scroll functionality
   useEffect(() => {
     const interval = setInterval(() => {
-      if (items.length > 1) {
-        const nextIndex = (currentIndex + 1) % items.length
+      if (carouselItems.length > 1) {
+        const nextIndex = (currentIndex + 1) % carouselItems.length
         scrollViewRef.current?.scrollTo({
           x: nextIndex * (CARD_WIDTH + CARD_SPACING),
           animated: true
@@ -51,7 +85,7 @@ export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
     }, 4000) // Change slide every 4 seconds
 
     return () => clearInterval(interval)
-  }, [currentIndex, items.length])
+  }, [currentIndex, carouselItems.length])
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const scrollPosition = event.nativeEvent.contentOffset.x
@@ -74,6 +108,11 @@ export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
       </AppText>
       
       {/* Carousel */}
+      {loading ? (
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#0000ff" />
+        </View>
+      ) : (
       <ScrollView
         ref={scrollViewRef}
         horizontal
@@ -86,11 +125,11 @@ export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
         decelerationRate="fast"
         snapToAlignment="start"
       >
-        {items.map((item, index) => (
+        {carouselItems.map((item, index) => (
           <TouchableOpacity
             key={item.id}
             onPress={item.onPress}
-            style={{ width: CARD_WIDTH, marginRight: index < items.length - 1 ? 16 : 0 }}
+            style={{ width: CARD_WIDTH, marginRight: index < carouselItems.length - 1 ? 16 : 0 }}
           >
             <View 
               className="rounded-2xl p-3 shadow-lg relative overflow-hidden h-44"
@@ -193,13 +232,13 @@ export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
               </View>
             </View>
           </TouchableOpacity>
-        ))}
-      </ScrollView>
-
+          ))}
+        </ScrollView>
+      )}
       {/* Pagination Dots */}
-      {items.length > 1 && (
+      {carouselItems.length > 1 && (
         <View className="flex-row justify-center mt-4">
-          {items.map((_, index) => (
+          {carouselItems.map((_, index) => (
             <TouchableOpacity
               key={index}
               onPress={() => scrollToIndex(index)}
