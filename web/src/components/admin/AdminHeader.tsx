@@ -2,9 +2,9 @@
 
 import { useSidebar } from "@/context/SidebarContext";
 import {
-  Bars3Icon,
-  BellIcon,
-  UserCircleIcon,
+    Bars3Icon,
+    BellIcon,
+    UserCircleIcon,
 } from "@heroicons/react/24/outline";
 
 export default function AdminHeader() {

@@ -1,111 +1,81 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  UserCircleIcon,
+import { client } from "@/supabase/supabase";
+import {
   EyeIcon,
   PencilIcon,
   TrashIcon,
-  CheckCircleIcon,
-  XCircleIcon
-} from '@heroicons/react/24/outline';
+  UserCircleIcon,
+} from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 
-const users = [
-  {
-    id: 1,
-    name: 'Alex Johnson',
-    email: 'alex.johnson@email.com',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face',
-    fitnessGoal: 'Muscle Gain',
-    subscription: 'Weekly Plan',
-    subscriptionStatus: 'active',
-    totalOrders: 12,
-    totalSpent: 456.78,
-    joinDate: '2024-01-01',
-    lastOrder: '2024-01-20',
-    status: 'active',
-  },
-  {
-    id: 2,
-    name: 'Sarah Wilson',
-    email: 'sarah.wilson@email.com',
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face',
-    fitnessGoal: 'Fat Loss',
-    subscription: 'Monthly Plan',
-    subscriptionStatus: 'active',
-    totalOrders: 8,
-    totalSpent: 312.45,
-    joinDate: '2024-01-05',
-    lastOrder: '2024-01-19',
-    status: 'active',
-  },
-  {
-    id: 3,
-    name: 'Mike Chen',
-    email: 'mike.chen@email.com',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
-    fitnessGoal: 'Maintenance',
-    subscription: '3-Day Trial',
-    subscriptionStatus: 'expired',
-    totalOrders: 3,
-    totalSpent: 89.97,
-    joinDate: '2024-01-15',
-    lastOrder: '2024-01-18',
-    status: 'inactive',
-  },
-  {
-    id: 4,
-    name: 'Emma Davis',
-    email: 'emma.davis@email.com',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop&crop=face',
-    fitnessGoal: 'Muscle Gain',
-    subscription: 'Weekly Plan',
-    subscriptionStatus: 'paused',
-    totalOrders: 15,
-    totalSpent: 567.89,
-    joinDate: '2023-12-20',
-    lastOrder: '2024-01-17',
-    status: 'active',
-  },
-  {
-    id: 5,
-    name: 'David Brown',
-    email: 'david.brown@email.com',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face',
-    fitnessGoal: 'Fat Loss',
-    subscription: 'Monthly Plan',
-    subscriptionStatus: 'active',
-    totalOrders: 6,
-    totalSpent: 234.56,
-    joinDate: '2024-01-10',
-    lastOrder: '2024-01-16',
-    status: 'active',
-  },
-];
+interface UserProfile {
+  id: string;
+  email: string;
+  full_name: string | null;
+  phone: string | null;
+  address: string | null;
+  role: "user" | "admin" | "moderator" | "super_admin";
+  created_at: string;
+  updated_at: string;
+}
 
 export default function UserManagement() {
-  const [selectedUsers, setSelectedUsers] = useState<number[]>([]);
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Fetch users from Supabase
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await client
+          .from("profiles")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) {
+          console.error("Error fetching users:", error);
+          return;
+        }
+
+        setUsers(data || []);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const handleSelectAll = () => {
     if (selectedUsers.length === users.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(users.map(user => user.id));
+      setSelectedUsers(users.map((user) => user.id));
     }
   };
 
-  const handleSelectUser = (userId: number) => {
-    setSelectedUsers(prev => 
-      prev.includes(userId) 
-        ? prev.filter(id => id !== userId)
+  const handleSelectUser = (userId: string) => {
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
 
-  const filteredUsers = filterStatus === 'all' 
-    ? users 
-    : users.filter(user => user.status === filterStatus);
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === "all" || user.role === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
 
   return (
     <div className="space-y-6">
@@ -123,6 +93,8 @@ export default function UserManagement() {
           <input
             type="text"
             placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           />
           <select
@@ -131,8 +103,10 @@ export default function UserManagement() {
             className="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
           >
             <option value="all">All Users</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="user">Users</option>
+            <option value="admin">Admins</option>
+            <option value="moderator">Moderators</option>
+            <option value="super_admin">Super Admins</option>
           </select>
         </div>
       </div>
@@ -155,19 +129,16 @@ export default function UserManagement() {
                   User
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Fitness Goal
+                  Phone
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Subscription
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Orders
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Spent
+                  Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Join Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Updated
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
@@ -178,79 +149,93 @@ export default function UserManagement() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.includes(user.id)}
-                      onChange={() => handleSelectUser(user.id)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <img
-                        className="h-10 w-10 rounded-full object-cover"
-                        src={user.avatar}
-                        alt={user.name}
-                      />
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                        <div className="text-sm text-gray-500">{user.email}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.fitnessGoal}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{user.subscription}</div>
-                    <div className="text-sm text-gray-500">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        user.subscriptionStatus === 'active' 
-                          ? 'bg-green-100 text-green-800'
-                          : user.subscriptionStatus === 'paused'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.subscriptionStatus}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {user.totalOrders}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    ${user.totalSpent.toFixed(2)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(user.joinDate).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      user.status === 'active' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {user.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        <EyeIcon className="h-4 w-4" />
-                      </button>
-                      <button className="text-indigo-600 hover:text-indigo-900">
-                        <PencilIcon className="h-4 w-4" />
-                      </button>
-                      <button className="text-red-600 hover:text-red-900">
-                        <TrashIcon className="h-4 w-4" />
-                      </button>
-                    </div>
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-6 py-4 text-center text-gray-500"
+                  >
+                    Loading users...
                   </td>
                 </tr>
-              ))}
+              ) : filteredUsers.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={8}
+                    className="px-6 py-4 text-center text-gray-500"
+                  >
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                filteredUsers.map((user) => (
+                  <tr key={user.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        checked={selectedUsers.includes(user.id)}
+                        onChange={() => handleSelectUser(user.id)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
+                          <UserCircleIcon className="h-6 w-6 text-gray-500" />
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">
+                            {user.full_name || "No name"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {user.email}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {user.phone || "No phone"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                          user.role === "admin" || user.role === "super_admin"
+                            ? "bg-red-100 text-red-800"
+                            : user.role === "moderator"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-green-100 text-green-800"
+                        }`}
+                      >
+                        {user.role.replace("_", " ")}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.created_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(user.updated_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        Active
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <button className="text-blue-600 hover:text-blue-900">
+                          <EyeIcon className="h-4 w-4" />
+                        </button>
+                        <button className="text-indigo-600 hover:text-indigo-900">
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button className="text-red-600 hover:text-red-900">
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -258,8 +243,3 @@ export default function UserManagement() {
     </div>
   );
 }
-
-
-
-
-

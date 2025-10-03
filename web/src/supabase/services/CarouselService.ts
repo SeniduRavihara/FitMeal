@@ -215,3 +215,4 @@ export class CarouselService {
     return { total, active, inactive };
   }
 }
+

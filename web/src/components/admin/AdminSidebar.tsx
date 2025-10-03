@@ -2,15 +2,15 @@
 
 import { useSidebar } from "@/context/SidebarContext";
 import {
-  CalendarIcon,
-  ChartBarIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  CogIcon,
-  HomeIcon,
-  ShoppingBagIcon,
-  UserGroupIcon,
-  XMarkIcon,
+    CalendarIcon,
+    ChartBarIcon,
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    CogIcon,
+    HomeIcon,
+    ShoppingBagIcon,
+    UserGroupIcon,
+    XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";

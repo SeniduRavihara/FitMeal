@@ -105,7 +105,7 @@ const styles = {
     backgroundColor: "#ffffff",
   },
   inputError: {
-    borderColor: "#fca5a5",
+    border: "1px solid #fca5a5",
   },
   textarea: {
     display: "block",
