@@ -27,6 +27,27 @@ export default function RootLayout() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen name="cart" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="order-history"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="shipping-address"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="create-request"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="privacy-policy"
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen name="settings" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="edit-profile"
+                options={{ headerShown: false }}
+              />
             </Stack>
           </AuthGuard>
         </CartProvider>

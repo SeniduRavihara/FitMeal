@@ -1,28 +1,44 @@
-import { View, ScrollView, Pressable, Image, TouchableOpacity } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { useAuth } from "../contexts/AuthContext";
-import { router } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 
 export function ProfileScreen() {
   const { session, signOut } = useAuth();
 
   const handleEditProfile = () => {
-    // TODO: Navigate to edit profile
-    console.log('Edit profile');
+    router.push("/edit-profile");
   };
 
   const handleSettings = (setting: string) => {
-    // TODO: Navigate to specific setting
-    console.log('Navigate to:', setting);
+    switch (setting) {
+      case "order-history":
+        router.push("/order-history");
+        break;
+      case "shipping-address":
+        router.push("/shipping-address");
+        break;
+      case "create-request":
+        router.push("/create-request");
+        break;
+      case "privacy-policy":
+        router.push("/privacy-policy");
+        break;
+      case "settings":
+        router.push("/settings");
+        break;
+      default:
+        console.log("Navigate to:", setting);
+    }
   };
 
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
     }
   };
 
@@ -35,9 +51,13 @@ export function ProfileScreen() {
             <View className="w-20 h-20 bg-orange-100 rounded-full items-center justify-center">
               <Ionicons name="person-outline" size={32} color="#FB923C" />
             </View>
-            
+
             <View className="items-center space-y-2">
-              <AppText variant="h2" weight="bold" className="text-gray-900 text-center">
+              <AppText
+                variant="h2"
+                weight="bold"
+                className="text-gray-900 text-center"
+              >
                 Welcome Back!
               </AppText>
               <AppText variant="body" className="text-gray-500 text-center">
@@ -46,25 +66,27 @@ export function ProfileScreen() {
             </View>
 
             <View className="w-full space-y-3">
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="bg-orange-500 py-4 px-6 rounded-xl"
-                onPress={() => router.push('/(auth)/sign-in')}
+                onPress={() => router.push("/(auth)/sign-in")}
               >
-                <AppText className="text-white text-center font-semibold">Sign In</AppText>
+                <AppText className="text-white text-center font-semibold">
+                  Sign In
+                </AppText>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
+
+              <TouchableOpacity
                 className="border border-orange-200 py-4 px-6 rounded-xl"
-                onPress={() => router.push('/(auth)/sign-up')}
+                onPress={() => router.push("/(auth)/sign-up")}
               >
-                <AppText className="text-orange-500 text-center font-semibold">Create Account</AppText>
+                <AppText className="text-orange-500 text-center font-semibold">
+                  Create Account
+                </AppText>
               </TouchableOpacity>
             </View>
 
             <TouchableOpacity onPress={() => router.back()}>
-              <AppText className="text-gray-400">
-                Continue Browsing
-              </AppText>
+              <AppText className="text-gray-400">Continue Browsing</AppText>
             </TouchableOpacity>
           </View>
         </View>
@@ -90,7 +112,7 @@ export function ProfileScreen() {
               <Ionicons name="person" size={40} color="#FB923C" />
             </View>
             {/* Edit Icon */}
-            <TouchableOpacity 
+            <TouchableOpacity
               className="absolute -bottom-1 -right-1 w-8 h-8 bg-orange-200 rounded-full items-center justify-center"
               onPress={handleEditProfile}
             >
@@ -101,10 +123,10 @@ export function ProfileScreen() {
           {/* User Info */}
           <View className="items-center mb-6">
             <AppText className="text-xl font-bold text-gray-900 mb-1">
-              {session.user.user_metadata?.name || 'User'}
+              {session.user.user_metadata?.name || "User"}
             </AppText>
             <AppText className="text-base text-gray-500 mb-1">
-              {session.user.phone || 'No phone number'}
+              {session.user.phone || "No phone number"}
             </AppText>
             <AppText className="text-base text-gray-500">
               {session.user.email}
@@ -115,9 +137,9 @@ export function ProfileScreen() {
         {/* Menu Items */}
         <View className="px-6 space-y-1">
           {/* Order History */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
-            onPress={() => handleSettings('order-history')}
+            onPress={() => handleSettings("order-history")}
           >
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
               <Ionicons name="time-outline" size={20} color="#FB923C" />
@@ -129,9 +151,9 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Shipping Address */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
-            onPress={() => handleSettings('shipping-address')}
+            onPress={() => handleSettings("shipping-address")}
           >
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
               <Ionicons name="location-outline" size={20} color="#FB923C" />
@@ -143,12 +165,16 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Create Request */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
-            onPress={() => handleSettings('create-request')}
+            onPress={() => handleSettings("create-request")}
           >
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
-              <Ionicons name="document-text-outline" size={20} color="#FB923C" />
+              <Ionicons
+                name="document-text-outline"
+                size={20}
+                color="#FB923C"
+              />
             </View>
             <AppText className="flex-1 text-base text-gray-900 font-medium">
               Create Request
@@ -157,9 +183,9 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Privacy Policy */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
-            onPress={() => handleSettings('privacy-policy')}
+            onPress={() => handleSettings("privacy-policy")}
           >
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
               <Ionicons name="lock-closed-outline" size={20} color="#FB923C" />
@@ -171,9 +197,9 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Settings */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
-            onPress={() => handleSettings('settings')}
+            onPress={() => handleSettings("settings")}
           >
             <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-4">
               <Ionicons name="settings-outline" size={20} color="#FB923C" />
@@ -185,7 +211,7 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Log out */}
-          <TouchableOpacity 
+          <TouchableOpacity
             className="flex-row items-center py-4"
             onPress={handleSignOut}
           >
