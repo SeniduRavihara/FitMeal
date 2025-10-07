@@ -1,81 +1,79 @@
 import { Tabs } from "expo-router";
-import React from "react";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
+import { SafeAreaView, View } from "react-native";
+import { FloatingTabBarProfessional } from "../../components/navigation/FloatingTabBarProfessional";
+import { TabName } from "../../types";
 
 export default function TabLayout() {
+  const [activeTab, setActiveTab] = useState<TabName>("home");
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#007AFF",
-        tabBarInactiveTintColor: "#86868B",
-        tabBarStyle: {
-          backgroundColor: "#FFFFFF",
-          borderTopWidth: 1,
-          borderTopColor: "#E5E5EA",
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 88,
-        },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: "500",
-          marginTop: 4,
-        },
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Home",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons 
-              name={focused ? "home" : "home-outline"} 
-              color={color} 
-              size={size} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="subscriptions"
-        options={{
-          title: "Plans",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons 
-              name={focused ? "calendar" : "calendar-outline"} 
-              color={color} 
-              size={size} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="orders"
-        options={{
-          title: "Orders",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons 
-              name={focused ? "bag" : "bag-outline"} 
-              color={color} 
-              size={size} 
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons 
-              name={focused ? "person" : "person-outline"} 
-              color={color} 
-              size={size} 
-            />
-          ),
-        }}
-      />
-    </Tabs>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
+      <View style={{ flex: 1 }}>
+        <Tabs
+          screenOptions={{
+            tabBarStyle: {
+              display: "none", // Hide the default tab bar
+            },
+            headerShown: false,
+          }}
+          screenListeners={{
+            state: (e) => {
+              // Update active tab when navigation changes
+              const state = e.data.state;
+              if (state) {
+                const routeName = state.routes[state.index]?.name;
+                if (routeName) {
+                  // Map route names to TabName
+                  const tabMapping: Record<string, TabName> = {
+                    index: "home",
+                    subscriptions: "subscriptions",
+                    orders: "orders",
+                    profile: "profile",
+                  };
+                  const mappedTab = tabMapping[routeName];
+                  if (mappedTab && mappedTab !== activeTab) {
+                    setActiveTab(mappedTab);
+                  }
+                }
+              }
+            },
+          }}
+        >
+          <Tabs.Screen
+            name="index"
+            options={{
+              title: "Home",
+            }}
+          />
+          <Tabs.Screen
+            name="subscriptions"
+            options={{
+              title: "Plans",
+            }}
+          />
+          <Tabs.Screen
+            name="orders"
+            options={{
+              title: "Orders",
+            }}
+          />
+          <Tabs.Screen
+            name="profile"
+            options={{
+              title: "Profile",
+            }}
+          />
+        </Tabs>
+
+        <FloatingTabBarProfessional
+          activeTab={activeTab}
+          onTabPress={(tab) => {
+            setActiveTab(tab);
+            // The tab navigation will handle the actual navigation
+          }}
+        />
+      </View>
+    </SafeAreaView>
   );
 }

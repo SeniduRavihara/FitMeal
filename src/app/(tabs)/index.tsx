@@ -1,6 +1,6 @@
 import React from "react";
-import { HomeScreen } from "../../screens/HomeScreen";
+import { HomeScreenMealBuilder } from "../../screens/HomeScreenMealBuilder";
 
 export default function IndexScreen() {
-  return <HomeScreen />;
+  return <HomeScreenMealBuilder />;
 }
