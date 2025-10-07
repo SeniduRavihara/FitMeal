@@ -30,6 +30,10 @@ export default function RootLayout() {
                 />
                 <Stack.Screen name="cart" options={{ headerShown: false }} />
                 <Stack.Screen
+                  name="checkout"
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
                   name="order-history"
                   options={{ headerShown: false }}
                 />

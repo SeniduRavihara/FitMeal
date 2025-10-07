@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import AuthPrompt from "../components/AuthPrompt";
+import { CustomAlert } from "../components/CustomAlert";
 import FeaturedCarousel from "../components/FeaturedCarousel";
 import GuestHeader from "../components/GuestHeader";
 import { MealBaseCard } from "../components/meal/MealBaseCard";
@@ -17,6 +18,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { useCustomMealCart } from "../contexts/CustomMealCartContext";
 import { MEAL_BASES, getFeaturedMealBases } from "../data/mealBases";
 import { useCarousel } from "../hooks/useCarousel";
+import { useCustomAlert } from "../hooks/useCustomAlert";
 import { MealBase } from "../types/mealBuilder";
 import { MealCustomizerScreen } from "./MealCustomizerScreen";
 
@@ -40,6 +42,8 @@ export function HomeScreenMealBuilder() {
     loading: carouselLoading,
     error: carouselError,
   } = useCarousel();
+  const { showSuccess, visible, alertConfig, handleConfirm, handleCancel } =
+    useCustomAlert();
 
   // Filter meal bases based on search
   const filteredMealBases = MEAL_BASES.filter(
@@ -72,6 +76,10 @@ export function HomeScreenMealBuilder() {
     addItem(customMeal);
     setCustomizerVisible(false);
     setSelectedMealBase(null);
+    showSuccess(
+      "Added to Cart! 🎉",
+      `Your ${customMeal.mealBase.name} with ${customMeal.customization.focus} focus has been added to your cart.`
+    );
   };
 
   const handleOrderNow = (customMeal: any) => {
@@ -407,6 +415,21 @@ export function HomeScreenMealBuilder() {
           />
         )}
       </Modal>
+
+      {/* Custom Alert */}
+      {alertConfig && (
+        <CustomAlert
+          visible={visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          confirmText={alertConfig.confirmText}
+          cancelText={alertConfig.cancelText}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          type={alertConfig.type}
+          showCancel={alertConfig.showCancel}
+        />
+      )}
     </SafeAreaView>
   );
 }

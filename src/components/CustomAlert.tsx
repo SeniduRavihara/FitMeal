@@ -1,80 +1,263 @@
-import React from 'react'
-import { View, TouchableOpacity, Modal } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
-import { AppText } from './AppText'
+import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import React from "react";
+import {
+  Animated,
+  Dimensions,
+  Modal,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { AppText } from "./AppText";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 interface CustomAlertProps {
-  visible: boolean
-  onClose: () => void
-  title: string
-  message: string
-  type?: 'success' | 'error' | 'warning' | 'info'
-  buttonText?: string
+  visible: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  type?: "default" | "success" | "warning" | "error";
+  showCancel?: boolean;
 }
 
-export default function CustomAlert({
+export function CustomAlert({
   visible,
-  onClose,
   title,
   message,
-  type = 'info',
-  buttonText = 'OK'
+  confirmText = "OK",
+  cancelText = "Cancel",
+  onConfirm,
+  onCancel,
+  type = "default",
+  showCancel = true,
 }: CustomAlertProps) {
-  const getIconAndColor = () => {
-    switch (type) {
-      case 'success':
-        return { icon: 'checkmark-circle', color: '#10B981', bgColor: '#ECFDF5' }
-      case 'error':
-        return { icon: 'close-circle', color: '#EF4444', bgColor: '#FEF2F2' }
-      case 'warning':
-        return { icon: 'warning', color: '#F59E0B', bgColor: '#FFFBEB' }
-      default:
-        return { icon: 'information-circle', color: '#FB923C', bgColor: '#FFF7ED' }
-    }
-  }
+  const scaleValue = React.useRef(new Animated.Value(0)).current;
+  const opacityValue = React.useRef(new Animated.Value(0)).current;
 
-  const { icon, color, bgColor } = getIconAndColor()
+  React.useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.spring(scaleValue, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }),
+        Animated.timing(opacityValue, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.spring(scaleValue, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 100,
+          friction: 8,
+        }),
+        Animated.timing(opacityValue, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]);
+
+  const getTypeConfig = () => {
+    switch (type) {
+      case "success":
+        return {
+          icon: "checkmark-circle",
+          iconColor: "#34C759",
+          backgroundColor: "#F0F9F0",
+          borderColor: "#34C759",
+        };
+      case "warning":
+        return {
+          icon: "warning",
+          iconColor: "#FF9500",
+          backgroundColor: "#FFF8F0",
+          borderColor: "#FF9500",
+        };
+      case "error":
+        return {
+          icon: "close-circle",
+          iconColor: "#FF3B30",
+          backgroundColor: "#FFF0F0",
+          borderColor: "#FF3B30",
+        };
+      default:
+        return {
+          icon: "information-circle",
+          iconColor: "#007AFF",
+          backgroundColor: "#F0F9FF",
+          borderColor: "#007AFF",
+        };
+    }
+  };
+
+  const typeConfig = getTypeConfig();
 
   return (
     <Modal
-      visible={visible}
       transparent
-      animationType="fade"
-      onRequestClose={onClose}
+      visible={visible}
+      animationType="none"
+      onRequestClose={onCancel}
     >
-      <View className="flex-1 bg-black/50 items-center justify-center px-6">
-        <View className="bg-white rounded-2xl p-6 w-full max-w-sm">
-          {/* Icon */}
-          <View className="items-center mb-4">
-            <View 
-              className="w-16 h-16 rounded-full items-center justify-center"
-              style={{ backgroundColor: bgColor }}
-            >
-              <Ionicons name={icon as any} size={32} color={color} />
-            </View>
-          </View>
+      <Animated.View
+        style={[
+          styles.overlay,
+          {
+            opacity: opacityValue,
+          },
+        ]}
+      >
+        <BlurView intensity={20} style={StyleSheet.absoluteFill} />
 
-          {/* Content */}
-          <View className="items-center mb-6">
-            <AppText className="text-lg font-bold text-gray-900 mb-2 text-center">
+        <Animated.View
+          style={[
+            styles.alertContainer,
+            {
+              transform: [{ scale: scaleValue }],
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.alertBox,
+              {
+                backgroundColor: typeConfig.backgroundColor,
+                borderColor: typeConfig.borderColor,
+              },
+            ]}
+          >
+            {/* Icon */}
+            <View style={styles.iconContainer}>
+              <Ionicons
+                name={typeConfig.icon}
+                size={48}
+                color={typeConfig.iconColor}
+              />
+            </View>
+
+            {/* Title */}
+            <AppText
+              variant="h3"
+              weight="bold"
+              color="primary"
+              style={styles.title}
+            >
               {title}
             </AppText>
-            <AppText className="text-base text-gray-600 text-center leading-6">
+
+            {/* Message */}
+            <AppText variant="body" color="secondary" style={styles.message}>
               {message}
             </AppText>
-          </View>
 
-          {/* Button */}
-          <TouchableOpacity
-            className="bg-orange-500 py-3 rounded-xl items-center"
-            onPress={onClose}
-          >
-            <AppText className="text-white font-semibold">
-              {buttonText}
-            </AppText>
-          </TouchableOpacity>
-        </View>
-      </View>
+            {/* Buttons */}
+            <View style={styles.buttonContainer}>
+              {showCancel && (
+                <TouchableOpacity
+                  style={[styles.button, styles.cancelButton]}
+                  onPress={onCancel}
+                  activeOpacity={0.8}
+                >
+                  <AppText variant="body" weight="semibold" color="secondary">
+                    {cancelText}
+                  </AppText>
+                </TouchableOpacity>
+              )}
+
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.confirmButton,
+                  {
+                    backgroundColor: typeConfig.iconColor,
+                    flex: showCancel ? 1 : 2,
+                  },
+                ]}
+                onPress={onConfirm}
+                activeOpacity={0.8}
+              >
+                <AppText variant="body" weight="semibold" color="white">
+                  {confirmText}
+                </AppText>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Animated.View>
+      </Animated.View>
     </Modal>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  alertContainer: {
+    width: screenWidth * 0.85,
+    maxWidth: 400,
+  },
+  alertBox: {
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.25,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  title: {
+    textAlign: "center",
+    marginBottom: 12,
+  },
+  message: {
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 24,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  button: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButton: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E5E5E5",
+  },
+  confirmButton: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+});

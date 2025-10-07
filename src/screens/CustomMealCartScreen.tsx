@@ -1,11 +1,18 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React from "react";
-import { Alert, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { Button } from "../components/Button";
+import { CustomAlert } from "../components/CustomAlert";
 import { useCustomMealCart } from "../contexts/CustomMealCartContext";
+import { useCustomAlert } from "../hooks/useCustomAlert";
 import { formatMacroValue } from "../utils/macroCalculator";
+import {
+  getBottomSectionStyle,
+  getScrollViewContentStyle,
+} from "../utils/navigationSpacing";
 
 export function CustomMealCartScreen() {
   const {
@@ -19,39 +26,46 @@ export function CustomMealCartScreen() {
     getTotalMacros,
   } = useCustomMealCart();
 
+  const {
+    showConfirmation,
+    showError,
+    visible,
+    alertConfig,
+    handleConfirm,
+    handleCancel,
+  } = useCustomAlert();
+
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     updateQuantity(itemId, newQuantity);
   };
 
   const handleRemoveItem = (itemId: string) => {
-    Alert.alert(
+    const item = items.find((item) => item.id === itemId);
+    showConfirmation(
       "Remove Item",
-      "Are you sure you want to remove this item from your cart?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: () => removeItem(itemId),
-        },
-      ]
+      `Are you sure you want to remove "${item?.mealBase.name}" from your cart?`,
+      () => removeItem(itemId),
+      () => {} // Cancel action
     );
   };
 
   const handleClearCart = () => {
-    Alert.alert(
+    showConfirmation(
       "Clear Cart",
-      "Are you sure you want to remove all items from your cart?",
-      [
-        { text: "Cancel", style: "cancel" },
-        { text: "Clear", style: "destructive", onPress: clearCart },
-      ]
+      "Are you sure you want to remove all items from your cart? This action cannot be undone.",
+      clearCart,
+      () => {} // Cancel action
     );
   };
 
   const handleCheckout = () => {
-    // TODO: Implement checkout flow
-    Alert.alert("Checkout", "Checkout functionality coming soon!");
+    if (items.length === 0) {
+      showError("Empty Cart", "Please add items to your cart before checkout.");
+      return;
+    }
+
+    // Navigate to checkout screen
+    router.push("/checkout");
   };
 
   const totalMacros = getTotalMacros();
@@ -117,7 +131,11 @@ export function CustomMealCartScreen() {
         )}
       </View>
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={getScrollViewContentStyle()}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Cart Items */}
         <View style={{ paddingHorizontal: 20, paddingVertical: 16 }}>
           {items.map((item) => (
@@ -421,13 +439,16 @@ export function CustomMealCartScreen() {
 
       {/* Checkout Button */}
       <View
-        style={{
-          paddingHorizontal: 20,
-          paddingVertical: 16,
-          backgroundColor: "white",
-          borderTopWidth: 1,
-          borderTopColor: "#E5E5E5",
-        }}
+        style={[
+          {
+            paddingHorizontal: 20,
+            paddingVertical: 16,
+            backgroundColor: "white",
+            borderTopWidth: 1,
+            borderTopColor: "#E5E5E5",
+          },
+          getBottomSectionStyle(),
+        ]}
       >
         <Button
           title={`Proceed to Checkout - LKR ${finalTotal}`}
@@ -437,6 +458,21 @@ export function CustomMealCartScreen() {
           fullWidth
         />
       </View>
+
+      {/* Custom Alert */}
+      {alertConfig && (
+        <CustomAlert
+          visible={visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          confirmText={alertConfig.confirmText}
+          cancelText={alertConfig.cancelText}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          type={alertConfig.type}
+          showCancel={alertConfig.showCancel}
+        />
+      )}
     </SafeAreaView>
   );
 }

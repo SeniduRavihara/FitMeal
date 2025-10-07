@@ -2,7 +2,6 @@ import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Dimensions,
   Image,
   ScrollView,
@@ -12,6 +11,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { Button } from "../components/Button";
+import { CustomAlert } from "../components/CustomAlert";
+import { useCustomAlert } from "../hooks/useCustomAlert";
 import {
   MacroTargets,
   MealBase,
@@ -49,6 +50,9 @@ export function MealCustomizerScreen({
     fats: 18,
     calories: 414,
   });
+
+  const { showSuccess, visible, alertConfig, handleConfirm, handleCancel } =
+    useCustomAlert();
 
   // Update macros when focus or amount changes
   useEffect(() => {
@@ -96,7 +100,10 @@ export function MealCustomizerScreen({
     };
 
     onAddToCart(customMeal);
-    Alert.alert("Added to Cart", "Your custom meal has been added to cart!");
+    showSuccess(
+      "Added to Cart! 🎉",
+      `Your ${mealBase.name} with ${selectedFocus} focus (${formatMacroValue(targetAmount)}) has been added to your cart.`
+    );
   };
 
   const handleOrderNow = () => {
@@ -513,6 +520,21 @@ export function MealCustomizerScreen({
           />
         </View>
       </ScrollView>
+
+      {/* Custom Alert */}
+      {alertConfig && (
+        <CustomAlert
+          visible={visible}
+          title={alertConfig.title}
+          message={alertConfig.message}
+          confirmText={alertConfig.confirmText}
+          cancelText={alertConfig.cancelText}
+          onConfirm={handleConfirm}
+          onCancel={handleCancel}
+          type={alertConfig.type}
+          showCancel={alertConfig.showCancel}
+        />
+      )}
     </SafeAreaView>
   );
 }
