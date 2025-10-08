@@ -1,6 +1,6 @@
 import React from "react";
-import { CustomMealCartScreen } from "../../screens/CustomMealCartScreen";
+import { OrderHistoryScreen } from "../../screens/OrderHistoryScreen";
 
 export default function OrdersTab() {
-  return <CustomMealCartScreen />;
+  return <OrderHistoryScreen />;
 }

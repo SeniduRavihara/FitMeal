@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   Modal,
@@ -12,6 +13,7 @@ import { AppText } from "../components/AppText";
 import AuthPrompt from "../components/AuthPrompt";
 import { CustomAlert } from "../components/CustomAlert";
 import FeaturedCarousel from "../components/FeaturedCarousel";
+import { FloatingCartIcon } from "../components/FloatingCartIcon";
 import GuestHeader from "../components/GuestHeader";
 import { MealBaseCard } from "../components/meal/MealBaseCard";
 import { useAuth } from "../contexts/AuthContext";
@@ -37,6 +39,7 @@ export function HomeScreenMealBuilder() {
 
   const { session } = useAuth();
   const { addItem, getTotalItems } = useCustomMealCart();
+
   const {
     carouselItems,
     loading: carouselLoading,
@@ -83,10 +86,18 @@ export function HomeScreenMealBuilder() {
   };
 
   const handleOrderNow = (customMeal: any) => {
-    // TODO: Implement direct ordering for custom meals
-    console.log("Ordering custom meal now:", customMeal);
+    // Add to cart and navigate to checkout
+    addItem(customMeal);
     setCustomizerVisible(false);
     setSelectedMealBase(null);
+
+    // Navigate directly to checkout
+    router.push("/checkout");
+
+    showSuccess(
+      "Added to Cart! 🎉",
+      `Your ${customMeal.mealBase.name} with ${customMeal.customization.focus} focus has been added to your cart.`
+    );
   };
 
   const handleCloseCustomizer = () => {
@@ -202,6 +213,7 @@ export function HomeScreenMealBuilder() {
                 shadowRadius: 4,
                 elevation: 3,
               }}
+              onPress={() => router.push("/checkout")}
             >
               <Ionicons name="bag-outline" size={20} color="#FFFFFF" />
               {getTotalItems() > 0 && (
@@ -430,6 +442,9 @@ export function HomeScreenMealBuilder() {
           showCancel={alertConfig.showCancel}
         />
       )}
+
+      {/* Floating Cart Icon */}
+      <FloatingCartIcon />
     </SafeAreaView>
   );
 }

@@ -32,9 +32,9 @@ const tabs = [
   {
     id: "orders" as TabName,
     name: "Orders",
-    icon: "bag-outline",
-    activeIcon: "bag",
-    badge: 2,
+    icon: "receipt-outline",
+    activeIcon: "receipt",
+    badge: null,
   },
   {
     id: "profile" as TabName,
