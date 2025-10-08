@@ -1,8 +1,8 @@
 import { AuthService } from "@/supabase/services/AuthService";
+import { UserService } from "@/supabase/services/UserService";
 import { Session, User } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "../supabase/supabase";
-import { UserService } from "@/supabase/services/UserService";
 
 interface AuthContextType {
   user: User | null;
@@ -32,7 +32,7 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-  children
+  children,
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -46,7 +46,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       try {
         const {
           data: { session },
-          error
+          error,
         } = await supabase.auth.getSession();
 
         if (error) {
@@ -70,9 +70,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.log("AuthContext: No session found - user needs to login"); // Debug log
         }
 
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+        // Safely set initial session and user
+        try {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        } catch (error) {
+          console.error(
+            "AuthContext: Error setting initial auth state:",
+            error
+          );
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+        }
       } catch (error) {
         console.error("AuthContext: Failed to initialize auth:", error);
         setLoading(false);
@@ -83,7 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Listen for auth changes
     const {
-      data: { subscription }
+      data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(
         "AuthContext: Auth state change:",
@@ -100,9 +111,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
+      // Safely update session and user
+      try {
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      } catch (error) {
+        console.error("AuthContext: Error updating auth state:", error);
+        setSession(null);
+        setUser(null);
+        setLoading(false);
+      }
 
       // If user signs in, create/update profile
       if (event === "SIGNED_IN" && session?.user) {
@@ -117,15 +136,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           if (error || !profile) {
             // Create new profile
             console.log("AuthContext: Creating new user profile..."); // Debug log
-            const { error: createError } =
-              await UserService.createUserProfile(session.user.id, {
+            const { error: createError } = await UserService.createUserProfile(
+              session.user.id,
+              {
                 email: session.user.email!,
                 name: session.user.user_metadata?.name || "Student",
                 level: "Beginner",
                 points: 0,
                 streak: 0,
-                rank: "Novice"
-              });
+                rank: "Novice",
+              }
+            );
             if (createError) {
               console.error(
                 "AuthContext: Failed to create user profile:",
@@ -187,10 +208,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     signUp,
     signIn,
     signOut,
-    updateProfile
+    updateProfile,
   };
 
-  console.log("AuthContext: Current user:", user?.email, "Loading:", loading); // Debug log
+  console.log(
+    "AuthContext: Current user:",
+    user?.email,
+    "Loading:",
+    loading,
+    "Session:",
+    !!session
+  ); // Debug log
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

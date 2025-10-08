@@ -1,125 +1,152 @@
-import React, { useState } from 'react'
-import { 
-  View, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
-  KeyboardAvoidingView, 
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
   Platform,
-  ActivityIndicator
-} from 'react-native'
-import { router } from 'expo-router'
-import { useAuth } from '../../contexts/AuthContext'
-import { Ionicons } from '@expo/vector-icons'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { AppText } from '../../components/AppText'
-import CustomAlert from '../../components/CustomAlert'
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { AppText } from "../../components/AppText";
+import { CustomAlert } from "../../components/CustomAlert";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function SignInScreen() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [emailError, setEmailError] = useState('')
-  const [passwordError, setPasswordError] = useState('')
-  const [alertVisible, setAlertVisible] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [alertVisible, setAlertVisible] = useState(false);
   const [alertConfig, setAlertConfig] = useState({
-    title: '',
-    message: '',
-    type: 'info' as 'success' | 'error' | 'warning' | 'info'
-  })
-  const { signIn } = useAuth()
+    title: "",
+    message: "",
+    type: "info" as "success" | "error" | "warning" | "info",
+  });
+  const { signIn } = useAuth();
 
   const validateEmail = (email: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return emailRegex.test(email)
-  }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const validateForm = () => {
-    let isValid = true
-    setEmailError('')
-    setPasswordError('')
+    let isValid = true;
+    setEmailError("");
+    setPasswordError("");
 
     if (!email.trim()) {
-      setEmailError('Email is required')
-      isValid = false
+      setEmailError("Email is required");
+      isValid = false;
     } else if (!validateEmail(email)) {
-      setEmailError('Please enter a valid email address')
-      isValid = false
+      setEmailError("Please enter a valid email address");
+      isValid = false;
     }
 
     if (!password.trim()) {
-      setPasswordError('Password is required')
-      isValid = false
+      setPasswordError("Password is required");
+      isValid = false;
     } else if (password.length < 6) {
-      setPasswordError('Password must be at least 6 characters')
-      isValid = false
+      setPasswordError("Password must be at least 6 characters");
+      isValid = false;
     }
 
-    return isValid
-  }
+    return isValid;
+  };
 
-  const showAlert = (title: string, message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
-    setAlertConfig({ title, message, type })
-    setAlertVisible(true)
-  }
+  const showAlert = (
+    title: string,
+    message: string,
+    type: "success" | "error" | "warning" | "info" = "info"
+  ) => {
+    setAlertConfig({ title, message, type });
+    setAlertVisible(true);
+  };
 
   const handleSignIn = async () => {
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
-    setLoading(true)
-    console.log('Attempting to sign in with:', { email, password: '***' })
-    
+    setLoading(true);
+    console.log("Attempting to sign in with:", { email, password: "***" });
+
     try {
-      const { data, error } = await signIn(email.trim(), password)
-      
-      console.log('Sign in response:', { data, error })
-      
+      const { data, error } = await signIn(email.trim(), password);
+
+      console.log("Sign in response:", { data, error });
+
       if (error) {
-        console.error('Sign in error:', error)
-        
+        console.error("Sign in error:", error);
+
         // Handle specific error messages
-        if (error.message.includes('Invalid login credentials')) {
-          showAlert('Sign In Failed', 'Invalid email or password. Please check your credentials and try again.', 'error')
-        } else if (error.message.includes('Email not confirmed')) {
-          showAlert('Email Not Verified', 'Please check your email and click the verification link before signing in.', 'warning')
+        if (error.message.includes("Invalid login credentials")) {
+          showAlert(
+            "Sign In Failed",
+            "Invalid email or password. Please check your credentials and try again.",
+            "error"
+          );
+        } else if (error.message.includes("Email not confirmed")) {
+          showAlert(
+            "Email Not Verified",
+            "Please check your email and click the verification link before signing in.",
+            "warning"
+          );
         } else {
-          showAlert('Sign In Error', error.message, 'error')
+          showAlert("Sign In Error", error.message, "error");
         }
       } else if (data.user) {
-        console.log('User signed in successfully:', data.user.id)
-        router.replace('/(tabs)')
+        console.log("User signed in successfully:", data.user.id);
+        router.replace("/(tabs)");
       }
     } catch (error) {
-      console.error('Sign in error:', error)
-      showAlert('Error', 'An unexpected error occurred. Please try again.', 'error')
+      console.error("Sign in error:", error);
+      showAlert(
+        "Error",
+        "An unexpected error occurred. Please try again.",
+        "error"
+      );
     }
-    
-    setLoading(false)
-  }
+
+    setLoading(false);
+  };
 
   const handleForgotPassword = () => {
     if (!email.trim()) {
-      showAlert('Email Required', 'Please enter your email address first.', 'warning')
-      return
+      showAlert(
+        "Email Required",
+        "Please enter your email address first.",
+        "warning"
+      );
+      return;
     }
-    
+
     if (!validateEmail(email)) {
-      showAlert('Invalid Email', 'Please enter a valid email address.', 'error')
-      return
+      showAlert(
+        "Invalid Email",
+        "Please enter a valid email address.",
+        "error"
+      );
+      return;
     }
 
-    showAlert('Feature Coming Soon', 'Password reset functionality will be available soon.', 'info')
-  }
-
+    showAlert(
+      "Feature Coming Soon",
+      "Password reset functionality will be available soon.",
+      "info"
+    );
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <ScrollView 
+        <ScrollView
           className="flex-1"
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
@@ -144,7 +171,9 @@ export default function SignInScreen() {
               <AppText className="text-sm font-medium text-gray-700 mb-3">
                 Email Address
               </AppText>
-              <View className={`flex-row items-center bg-gray-50 rounded-xl px-4 py-4 ${emailError ? 'border border-red-300' : ''}`}>
+              <View
+                className={`flex-row items-center bg-gray-50 rounded-xl px-4 py-4 ${emailError ? "border border-red-300" : ""}`}
+              >
                 <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-3">
                   <Ionicons name="mail-outline" size={20} color="#FB923C" />
                 </View>
@@ -153,8 +182,8 @@ export default function SignInScreen() {
                   placeholder="Enter your email"
                   value={email}
                   onChangeText={(text) => {
-                    setEmail(text)
-                    if (emailError) setEmailError('')
+                    setEmail(text);
+                    if (emailError) setEmailError("");
                   }}
                   keyboardType="email-address"
                   autoCapitalize="none"
@@ -175,17 +204,23 @@ export default function SignInScreen() {
               <AppText className="text-sm font-medium text-gray-700 mb-3">
                 Password
               </AppText>
-              <View className={`flex-row items-center bg-gray-50 rounded-xl px-4 py-4 ${passwordError ? 'border border-red-300' : ''}`}>
+              <View
+                className={`flex-row items-center bg-gray-50 rounded-xl px-4 py-4 ${passwordError ? "border border-red-300" : ""}`}
+              >
                 <View className="w-10 h-10 bg-orange-100 rounded-full items-center justify-center mr-3">
-                  <Ionicons name="lock-closed-outline" size={20} color="#FB923C" />
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color="#FB923C"
+                  />
                 </View>
                 <TextInput
                   className="flex-1 text-base text-gray-900"
                   placeholder="Enter your password"
                   value={password}
                   onChangeText={(text) => {
-                    setPassword(text)
-                    if (passwordError) setPasswordError('')
+                    setPassword(text);
+                    if (passwordError) setPasswordError("");
                   }}
                   secureTextEntry={!showPassword}
                   autoCapitalize="none"
@@ -198,10 +233,10 @@ export default function SignInScreen() {
                   disabled={loading}
                   className="ml-2"
                 >
-                  <Ionicons 
-                    name={showPassword ? "eye-outline" : "eye-off-outline"} 
-                    size={20} 
-                    color="#FB923C" 
+                  <Ionicons
+                    name={showPassword ? "eye-outline" : "eye-off-outline"}
+                    size={20}
+                    color="#FB923C"
                   />
                 </TouchableOpacity>
               </View>
@@ -214,7 +249,7 @@ export default function SignInScreen() {
 
             {/* Forgot Password */}
             <View className="mb-6">
-              <TouchableOpacity 
+              <TouchableOpacity
                 onPress={handleForgotPassword}
                 disabled={loading}
                 className="self-end"
@@ -227,8 +262,8 @@ export default function SignInScreen() {
 
             {/* Sign In Button */}
             <View className="mb-8">
-              <TouchableOpacity 
-                className={`bg-orange-500 py-4 rounded-xl items-center ${loading ? 'opacity-50' : ''}`}
+              <TouchableOpacity
+                className={`bg-orange-500 py-4 rounded-xl items-center ${loading ? "opacity-50" : ""}`}
                 onPress={handleSignIn}
                 disabled={loading}
               >
@@ -245,10 +280,10 @@ export default function SignInScreen() {
             {/* Sign Up Link */}
             <View className="flex-row items-center justify-center">
               <AppText className="text-gray-500">
-                Don't have an account? 
+                Don't have an account?
               </AppText>
-              <TouchableOpacity 
-                onPress={() => router.push('/(auth)/sign-up')}
+              <TouchableOpacity
+                onPress={() => router.push("/(auth)/sign-up")}
                 disabled={loading}
                 className="ml-1"
               >
@@ -267,12 +302,13 @@ export default function SignInScreen() {
       {/* Custom Alert */}
       <CustomAlert
         visible={alertVisible}
-        onClose={() => setAlertVisible(false)}
+        onConfirm={() => setAlertVisible(false)}
+        onCancel={() => setAlertVisible(false)}
         title={alertConfig.title}
         message={alertConfig.message}
         type={alertConfig.type}
+        showCancel={false}
       />
     </SafeAreaView>
-  )
+  );
 }
-

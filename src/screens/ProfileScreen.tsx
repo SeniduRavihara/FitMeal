@@ -124,13 +124,13 @@ export function ProfileScreen() {
           {/* User Info */}
           <View className="items-center mb-6">
             <AppText className="text-xl font-bold text-gray-900 mb-1">
-              {session.user.user_metadata?.name || "User"}
+              {session?.user?.user_metadata?.name || "User"}
             </AppText>
             <AppText className="text-base text-gray-500 mb-1">
-              {session.user.phone || "No phone number"}
+              {session?.user?.phone || "No phone number"}
             </AppText>
             <AppText className="text-base text-gray-500">
-              {session.user.email}
+              {session?.user?.email || "No email"}
             </AppText>
           </View>
         </View>
