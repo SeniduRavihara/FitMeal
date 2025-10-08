@@ -1,283 +1,440 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { 
-  ClockIcon, 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  TruckIcon,
+import {
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
   EyeIcon,
-  PencilIcon 
-} from '@heroicons/react/24/outline';
+  PencilIcon,
+  TruckIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
+import React, { useEffect, useState } from "react";
+import {
+  OrderFilters,
+  OrderService,
+  OrderWithItems,
+} from "../../supabase/services/OrderService";
 
-const orders = [
-  {
-    id: 'ORD-001',
-    customer: 'Alex Johnson',
-    email: 'alex.johnson@email.com',
-    items: [
-      { name: 'Grilled Chicken & Quinoa Bowl', quantity: 2, price: 14.99 },
-      { name: 'Mediterranean Salmon', quantity: 1, price: 18.99 },
-    ],
-    total: 48.97,
-    deliveryFee: 2.99,
-    tax: 4.16,
-    grandTotal: 56.12,
-    status: 'delivered',
-    paymentMethod: 'Visa **** 1234',
-    deliveryAddress: '123 Main Street, San Francisco, CA 94102',
-    orderDate: '2024-01-20T12:00:00',
-    deliveryDate: '2024-01-20T18:15:00',
+// Order status configuration
+const ORDER_STATUS_CONFIG = {
+  pending: {
+    style: { backgroundColor: "#fef3c7", color: "#92400e" },
+    icon: ClockIcon,
+    text: "Pending",
   },
-  {
-    id: 'ORD-002',
-    customer: 'Sarah Wilson',
-    email: 'sarah.wilson@email.com',
-    items: [
-      { name: 'Vegan Buddha Bowl', quantity: 2, price: 12.99 },
-    ],
-    total: 25.98,
-    deliveryFee: 2.99,
-    tax: 2.32,
-    grandTotal: 31.29,
-    status: 'preparing',
-    paymentMethod: 'Mastercard **** 5678',
-    deliveryAddress: '456 Oak Avenue, San Francisco, CA 94103',
-    orderDate: '2024-01-20T14:30:00',
-    deliveryDate: null,
+  confirmed: {
+    style: { backgroundColor: "#dbeafe", color: "#1e40af" },
+    icon: CheckCircleIcon,
+    text: "Confirmed",
   },
-  {
-    id: 'ORD-003',
-    customer: 'Mike Chen',
-    email: 'mike.chen@email.com',
-    items: [
-      { name: 'Keto Beef Bowl', quantity: 1, price: 16.99 },
-      { name: 'Protein Smoothie', quantity: 2, price: 8.99 },
-    ],
-    total: 34.97,
-    deliveryFee: 2.99,
-    tax: 3.20,
-    grandTotal: 41.16,
-    status: 'confirmed',
-    paymentMethod: 'Apple Pay',
-    deliveryAddress: '789 Pine Street, San Francisco, CA 94104',
-    orderDate: '2024-01-20T16:45:00',
-    deliveryDate: null,
+  preparing: {
+    style: { backgroundColor: "#e0e7ff", color: "#3730a3" },
+    icon: ClockIcon,
+    text: "Preparing",
   },
-];
+  delivered: {
+    style: { backgroundColor: "#dcfce7", color: "#166534" },
+    icon: TruckIcon,
+    text: "Delivered",
+  },
+  cancelled: {
+    style: { backgroundColor: "#fee2e2", color: "#991b1b" },
+    icon: XCircleIcon,
+    text: "Cancelled",
+  },
+};
+
+const PAYMENT_STATUS_CONFIG = {
+  pending: {
+    style: { backgroundColor: "#fef3c7", color: "#92400e" },
+    text: "Pending",
+  },
+  paid: {
+    style: { backgroundColor: "#dcfce7", color: "#166534" },
+    text: "Paid",
+  },
+  failed: {
+    style: { backgroundColor: "#fee2e2", color: "#991b1b" },
+    text: "Failed",
+  },
+  refunded: {
+    style: { backgroundColor: "#f3f4f6", color: "#374151" },
+    text: "Refunded",
+  },
+};
 
 const styles = {
   container: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '1.5rem',
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "1.5rem",
   },
   header: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '1rem',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "1rem",
   },
   filters: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1rem',
+    display: "flex",
+    alignItems: "center",
+    gap: "1rem",
   },
   input: {
-    display: 'block',
-    width: '16rem',
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    color: '#111827',
-    backgroundColor: '#ffffff',
-    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+    display: "block",
+    width: "16rem",
+    padding: "0.5rem 0.75rem",
+    border: "1px solid #d1d5db",
+    borderRadius: "0.375rem",
+    fontSize: "0.875rem",
+    color: "#111827",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
   },
   select: {
-    display: 'block',
-    padding: '0.5rem 0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '0.375rem',
-    fontSize: '0.875rem',
-    color: '#111827',
-    backgroundColor: '#ffffff',
-    cursor: 'pointer',
+    display: "block",
+    padding: "0.5rem 0.75rem",
+    border: "1px solid #d1d5db",
+    borderRadius: "0.375rem",
+    fontSize: "0.875rem",
+    color: "#111827",
+    backgroundColor: "#ffffff",
+    cursor: "pointer",
   },
   tableContainer: {
-    backgroundColor: 'white',
-    boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-    borderRadius: '0.375rem',
-    overflow: 'hidden',
+    backgroundColor: "white",
+    boxShadow:
+      "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+    borderRadius: "0.375rem",
+    overflow: "hidden",
   },
   table: {
-    minWidth: '100%',
-    borderCollapse: 'collapse' as const,
+    minWidth: "100%",
+    borderCollapse: "collapse" as const,
   },
   tableHeader: {
-    backgroundColor: '#f9fafb',
+    backgroundColor: "#f9fafb",
   },
   tableHeaderCell: {
-    padding: '0.75rem 1.5rem',
-    textAlign: 'left' as const,
-    fontSize: '0.75rem',
-    fontWeight: '500',
-    color: '#6b7280',
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.05em',
-    borderBottom: '1px solid #e5e7eb',
+    padding: "0.75rem 1.5rem",
+    textAlign: "left" as const,
+    fontSize: "0.75rem",
+    fontWeight: "500",
+    color: "#6b7280",
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.05em",
+    borderBottom: "1px solid #e5e7eb",
   },
   tableRow: {
-    borderBottom: '1px solid #e5e7eb',
+    borderBottom: "1px solid #e5e7eb",
   },
   tableCell: {
-    padding: '1rem 1.5rem',
-    fontSize: '0.875rem',
-    color: '#111827',
-    verticalAlign: 'top' as const,
+    padding: "1rem 1.5rem",
+    fontSize: "0.875rem",
+    color: "#111827",
+    verticalAlign: "top" as const,
   },
   badge: {
-    display: 'inline-flex',
-    alignItems: 'center',
-    padding: '0.25rem 0.5rem',
-    borderRadius: '9999px',
-    fontSize: '0.75rem',
-    fontWeight: '500',
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "0.25rem 0.5rem",
+    borderRadius: "9999px",
+    fontSize: "0.75rem",
+    fontWeight: "500",
   },
   pendingBadge: {
-    backgroundColor: '#fef3c7',
-    color: '#92400e',
+    backgroundColor: "#fef3c7",
+    color: "#92400e",
   },
   confirmedBadge: {
-    backgroundColor: '#dbeafe',
-    color: '#1e40af',
+    backgroundColor: "#dbeafe",
+    color: "#1e40af",
   },
   preparingBadge: {
-    backgroundColor: '#e0e7ff',
-    color: '#3730a3',
+    backgroundColor: "#e0e7ff",
+    color: "#3730a3",
   },
   deliveredBadge: {
-    backgroundColor: '#dcfce7',
-    color: '#166534',
+    backgroundColor: "#dcfce7",
+    color: "#166534",
   },
   cancelledBadge: {
-    backgroundColor: '#fee2e2',
-    color: '#991b1b',
+    backgroundColor: "#fee2e2",
+    color: "#991b1b",
   },
   iconButton: {
-    padding: '0.25rem',
-    color: '#6b7280',
-    cursor: 'pointer',
-    border: 'none',
-    backgroundColor: 'transparent',
-    marginRight: '0.5rem',
+    padding: "0.25rem",
+    color: "#6b7280",
+    cursor: "pointer",
+    border: "none",
+    backgroundColor: "transparent",
+    marginRight: "0.5rem",
   },
   customerInfo: {
-    display: 'flex',
-    flexDirection: 'column' as const,
+    display: "flex",
+    flexDirection: "column" as const,
   },
   customerName: {
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#111827',
+    fontSize: "0.875rem",
+    fontWeight: "500",
+    color: "#111827",
   },
   customerEmail: {
-    fontSize: '0.875rem',
-    color: '#6b7280',
+    fontSize: "0.875rem",
+    color: "#6b7280",
   },
   itemsList: {
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: '0.25rem',
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: "0.25rem",
   },
   item: {
-    fontSize: '0.875rem',
-    color: '#111827',
+    fontSize: "0.875rem",
+    color: "#111827",
   },
   itemQuantity: {
-    color: '#6b7280',
+    color: "#6b7280",
   },
   priceInfo: {
-    display: 'flex',
-    flexDirection: 'column' as const,
+    display: "flex",
+    flexDirection: "column" as const,
   },
   totalPrice: {
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    color: '#111827',
+    fontSize: "0.875rem",
+    fontWeight: "500",
+    color: "#111827",
   },
   grandTotal: {
-    fontSize: '0.75rem',
-    color: '#6b7280',
+    fontSize: "0.75rem",
+    color: "#6b7280",
   },
   dateInfo: {
-    display: 'flex',
-    flexDirection: 'column' as const,
+    display: "flex",
+    flexDirection: "column" as const,
   },
   orderDate: {
-    fontSize: '0.875rem',
-    color: '#111827',
+    fontSize: "0.875rem",
+    color: "#111827",
   },
   deliveryDate: {
-    fontSize: '0.75rem',
-    color: '#6b7280',
+    fontSize: "0.75rem",
+    color: "#6b7280",
   },
   actions: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
   },
 };
 
 export default function OrderManagement() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState<OrderWithItems | null>(
+    null
+  );
+  const [updating, setUpdating] = useState<string | null>(null);
 
-  const getStatusBadge = (status: string) => {
-    const statusConfig = {
-      pending: { style: styles.pendingBadge, icon: ClockIcon, text: 'Pending' },
-      confirmed: { style: styles.confirmedBadge, icon: CheckCircleIcon, text: 'Confirmed' },
-      preparing: { style: styles.preparingBadge, icon: ClockIcon, text: 'Preparing' },
-      delivered: { style: styles.deliveredBadge, icon: TruckIcon, text: 'Delivered' },
-      cancelled: { style: styles.cancelledBadge, icon: XCircleIcon, text: 'Cancelled' },
-    };
+  // Fetch orders on component mount
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
-    const config = statusConfig[status] || statusConfig.pending;
-    const Icon = config.icon;
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const filters: OrderFilters = {
+        status: statusFilter === "all" ? undefined : statusFilter,
+        payment_status:
+          paymentStatusFilter === "all" ? undefined : paymentStatusFilter,
+        search: searchTerm || undefined,
+      };
+
+      const ordersData = await OrderService.getOrders(filters);
+      setOrders(ordersData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Refetch orders when filters change
+  useEffect(() => {
+    if (!loading) {
+      fetchOrders();
+    }
+  }, [statusFilter, paymentStatusFilter]);
+
+  // Debounced search
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (!loading) {
+        fetchOrders();
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchTerm]);
+
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
+    try {
+      setUpdating(orderId);
+      await OrderService.updateOrderStatus(orderId, newStatus);
+      await fetchOrders(); // Refresh the list
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update order status"
+      );
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const handlePaymentStatusUpdate = async (
+    orderId: string,
+    newPaymentStatus: string
+  ) => {
+    try {
+      setUpdating(orderId);
+      await OrderService.updatePaymentStatus(orderId, newPaymentStatus);
+      await fetchOrders(); // Refresh the list
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to update payment status"
+      );
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const getStatusBadge = (
+    status: string,
+    type: "order" | "payment" = "order"
+  ) => {
+    const config =
+      type === "order"
+        ? ORDER_STATUS_CONFIG[status as keyof typeof ORDER_STATUS_CONFIG] ||
+          ORDER_STATUS_CONFIG.pending
+        : PAYMENT_STATUS_CONFIG[status as keyof typeof PAYMENT_STATUS_CONFIG] ||
+          PAYMENT_STATUS_CONFIG.pending;
+
+    const Icon =
+      "icon" in config
+        ? (config.icon as React.ComponentType<{ style: any }>)
+        : null;
 
     return (
-      <span style={{ ...styles.badge, ...config.style }}>
-        <Icon style={{ width: '0.75rem', height: '0.75rem', marginRight: '0.25rem' }} />
+      <span
+        style={{
+          ...styles.badge,
+          ...config.style,
+        }}
+      >
+        {Icon && (
+          <Icon
+            style={{
+              width: "0.75rem",
+              height: "0.75rem",
+              marginRight: "0.25rem",
+            }}
+          />
+        )}
         {config.text}
       </span>
     );
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
-
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const formatPrice = (price: number) => {
-    return `$${price.toFixed(2)}`;
+  const formatPrice = (price: number | null) => {
+    if (price === null || price === undefined) return "LKR 0.00";
+    return `LKR ${price.toFixed(2)}`;
   };
+
+  const formatDateTime = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "400px",
+          color: "#6b7280",
+        }}
+      >
+        <div>Loading orders...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "2rem",
+          color: "#dc2626",
+        }}
+      >
+        <ExclamationTriangleIcon
+          style={{ width: "3rem", height: "3rem", marginBottom: "1rem" }}
+        />
+        <div
+          style={{
+            fontSize: "1.125rem",
+            fontWeight: "500",
+            marginBottom: "0.5rem",
+          }}
+        >
+          Error loading orders
+        </div>
+        <div style={{ fontSize: "0.875rem", marginBottom: "1rem" }}>
+          {error}
+        </div>
+        <button
+          onClick={fetchOrders}
+          style={{
+            padding: "0.5rem 1rem",
+            backgroundColor: "#dc2626",
+            color: "white",
+            border: "none",
+            borderRadius: "0.375rem",
+            cursor: "pointer",
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>
@@ -296,12 +453,23 @@ export default function OrderManagement() {
             onChange={(e) => setStatusFilter(e.target.value)}
             style={styles.select}
           >
-            <option value="all">All Status</option>
+            <option value="all">All Order Status</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
             <option value="preparing">Preparing</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
+          </select>
+          <select
+            value={paymentStatusFilter}
+            onChange={(e) => setPaymentStatusFilter(e.target.value)}
+            style={styles.select}
+          >
+            <option value="all">All Payment Status</option>
+            <option value="pending">Payment Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Payment Failed</option>
+            <option value="refunded">Refunded</option>
           </select>
         </div>
       </div>
@@ -315,81 +483,81 @@ export default function OrderManagement() {
               <th style={styles.tableHeaderCell}>Customer</th>
               <th style={styles.tableHeaderCell}>Items</th>
               <th style={styles.tableHeaderCell}>Total</th>
-              <th style={styles.tableHeaderCell}>Status</th>
+              <th style={styles.tableHeaderCell}>Order Status</th>
+              <th style={styles.tableHeaderCell}>Payment</th>
               <th style={styles.tableHeaderCell}>Order Date</th>
-              <th style={styles.tableHeaderCell}>Delivery</th>
               <th style={styles.tableHeaderCell}>Actions</th>
             </tr>
           </thead>
           <tbody>
-            {filteredOrders.map((order) => (
+            {orders.map((order) => (
               <tr key={order.id} style={styles.tableRow}>
                 <td style={styles.tableCell}>
-                  <div style={{ fontWeight: '500', color: '#2563eb' }}>
-                    {order.id}
+                  <div style={{ fontWeight: "500", color: "#2563eb" }}>
+                    {order.order_number || order.id.slice(0, 8)}
                   </div>
                 </td>
                 <td style={styles.tableCell}>
                   <div style={styles.customerInfo}>
-                    <div style={styles.customerName}>{order.customer}</div>
-                    <div style={styles.customerEmail}>{order.email}</div>
+                    <div style={styles.customerName}>
+                      {order.delivery_address?.full_name || "Unknown Customer"}
+                    </div>
+                    <div style={styles.customerEmail}>
+                      {order.delivery_address?.phone_number || "No phone"}
+                    </div>
                   </div>
                 </td>
                 <td style={styles.tableCell}>
                   <div style={styles.itemsList}>
-                    {order.items.map((item, index) => (
+                    {order.order_items?.map((item, index) => (
                       <div key={index} style={styles.item}>
-                        {item.name} <span style={styles.itemQuantity}>x{item.quantity}</span>
+                        {item.meal_name || "Custom Meal"}
+                        <span style={styles.itemQuantity}>
+                          x{item.quantity}
+                        </span>
                       </div>
-                    ))}
+                    )) || <div style={styles.item}>No items</div>}
                   </div>
                 </td>
                 <td style={styles.tableCell}>
                   <div style={styles.priceInfo}>
-                    <div style={styles.totalPrice}>{formatPrice(order.total)}</div>
+                    <div style={styles.totalPrice}>
+                      {formatPrice(order.total_amount)}
+                    </div>
                     <div style={styles.grandTotal}>
-                      Total: {formatPrice(order.grandTotal)}
+                      Delivery: {formatPrice(order.delivery_fee)}
                     </div>
                   </div>
                 </td>
                 <td style={styles.tableCell}>
-                  {getStatusBadge(order.status)}
+                  {getStatusBadge(order.order_status, "order")}
+                </td>
+                <td style={styles.tableCell}>
+                  {getStatusBadge(order.payment_status, "payment")}
                 </td>
                 <td style={styles.tableCell}>
                   <div style={styles.dateInfo}>
                     <div style={styles.orderDate}>
-                      {formatDate(order.orderDate)}
+                      {formatDateTime(order.created_at)}
                     </div>
-                  </div>
-                </td>
-                <td style={styles.tableCell}>
-                  <div style={styles.dateInfo}>
-                    {order.deliveryDate ? (
-                      <div style={styles.deliveryDate}>
-                        {formatDate(order.deliveryDate)}
-                      </div>
-                    ) : (
-                      <div style={{ ...styles.deliveryDate, fontStyle: 'italic' }}>
-                        Pending
-                      </div>
-                    )}
                   </div>
                 </td>
                 <td style={styles.tableCell}>
                   <div style={styles.actions}>
                     <button
                       onClick={() => setSelectedOrder(order)}
-                      style={{ ...styles.iconButton, color: '#2563eb' }}
+                      style={{ ...styles.iconButton, color: "#2563eb" }}
                       title="View Details"
                     >
-                      <EyeIcon style={{ width: '1rem', height: '1rem' }} />
+                      <EyeIcon style={{ width: "1rem", height: "1rem" }} />
                     </button>
                     <button
-                      onClick={() => console.log('Edit order:', order.id)}
-                      style={{ ...styles.iconButton, color: '#7c3aed' }}
+                      onClick={() => console.log("Edit order:", order.id)}
+                      style={{ ...styles.iconButton, color: "#7c3aed" }}
                       title="Edit Order"
+                      disabled={updating === order.id}
                     >
-                      <PencilIcon style={{ width: '1rem', height: '1rem' }} />
+                      <PencilIcon style={{ width: "1rem", height: "1rem" }} />
                     </button>
                   </div>
                 </td>
@@ -399,19 +567,29 @@ export default function OrderManagement() {
         </table>
       </div>
 
-      {filteredOrders.length === 0 && (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          padding: '3rem 0',
-          color: '#6b7280'
-        }}>
-          <ClockIcon style={{ width: '3rem', height: '3rem', marginBottom: '1rem' }} />
-          <div style={{ fontSize: '1.125rem', fontWeight: '500', marginBottom: '0.5rem' }}>
+      {orders.length === 0 && (
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "3rem 0",
+            color: "#6b7280",
+          }}
+        >
+          <ClockIcon
+            style={{ width: "3rem", height: "3rem", marginBottom: "1rem" }}
+          />
+          <div
+            style={{
+              fontSize: "1.125rem",
+              fontWeight: "500",
+              marginBottom: "0.5rem",
+            }}
+          >
             No orders found
           </div>
-          <div style={{ fontSize: '0.875rem' }}>
+          <div style={{ fontSize: "0.875rem" }}>
             Try adjusting your search or filter criteria
           </div>
         </div>
@@ -419,108 +597,247 @@ export default function OrderManagement() {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <div style={{
-          position: 'fixed',
-          inset: '0',
-          backgroundColor: 'rgba(75, 85, 99, 0.5)',
-          zIndex: 50,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <div style={{
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            padding: '1.5rem',
-            maxWidth: '32rem',
-            width: '90%',
-            maxHeight: '80vh',
-            overflowY: 'auto',
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              marginBottom: '1rem',
-            }}>
-              <h3 style={{
-                fontSize: '1.25rem',
-                fontWeight: '600',
-                color: '#111827',
-              }}>
+        <div
+          style={{
+            position: "fixed",
+            inset: "0",
+            backgroundColor: "rgba(75, 85, 99, 0.5)",
+            zIndex: 50,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "0.5rem",
+              padding: "1.5rem",
+              maxWidth: "32rem",
+              width: "90%",
+              maxHeight: "80vh",
+              overflowY: "auto",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginBottom: "1rem",
+              }}
+            >
+              <h3
+                style={{
+                  fontSize: "1.25rem",
+                  fontWeight: "600",
+                  color: "#111827",
+                }}
+              >
                 Order Details - {selectedOrder.id}
               </h3>
               <button
                 onClick={() => setSelectedOrder(null)}
                 style={{
-                  padding: '0.25rem',
-                  color: '#6b7280',
-                  cursor: 'pointer',
-                  border: 'none',
-                  backgroundColor: 'transparent',
+                  padding: "0.25rem",
+                  color: "#6b7280",
+                  cursor: "pointer",
+                  border: "none",
+                  backgroundColor: "transparent",
                 }}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
+            >
               <div>
-                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Customer Information</h4>
-                <p>{selectedOrder.customer}</p>
-                <p style={{ color: '#6b7280' }}>{selectedOrder.email}</p>
-                <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
-                  {selectedOrder.deliveryAddress}
+                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                  Customer Information
+                </h4>
+                <p>
+                  {selectedOrder.delivery_address?.full_name ||
+                    "Unknown Customer"}
+                </p>
+                <p style={{ color: "#6b7280" }}>
+                  {selectedOrder.delivery_address?.phone_number || "No phone"}
+                </p>
+                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  {selectedOrder.delivery_address?.address_line1 ||
+                    "No address"}
+                  {selectedOrder.delivery_address?.address_line2 &&
+                    `, ${selectedOrder.delivery_address.address_line2}`}
                 </p>
               </div>
 
               <div>
-                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Order Items</h4>
-                {selectedOrder.items.map((item, index) => (
-                  <div key={index} style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '0.5rem 0',
-                    borderBottom: index < selectedOrder.items.length - 1 ? '1px solid #e5e7eb' : 'none',
-                  }}>
-                    <span>{item.name} x{item.quantity}</span>
-                    <span>{formatPrice(item.price * item.quantity)}</span>
+                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                  Order Items
+                </h4>
+                {selectedOrder.order_items?.map((item, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "0.5rem 0",
+                      borderBottom:
+                        index < (selectedOrder.order_items?.length || 0) - 1
+                          ? "1px solid #e5e7eb"
+                          : "none",
+                    }}
+                  >
+                    <span>
+                      {item.meal_name || "Custom Meal"} x{item.quantity}
+                    </span>
+                    <span>
+                      {formatPrice(item.price_per_item * item.quantity)}
+                    </span>
                   </div>
-                ))}
+                )) || <div>No items found</div>}
               </div>
 
               <div>
-                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Payment Summary</h4>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                  Payment Summary
+                </h4>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   <span>Subtotal:</span>
-                  <span>{formatPrice(selectedOrder.total)}</span>
+                  <span>{formatPrice(selectedOrder.subtotal)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "0.25rem",
+                  }}
+                >
                   <span>Delivery Fee:</span>
-                  <span>{formatPrice(selectedOrder.deliveryFee)}</span>
+                  <span>{formatPrice(selectedOrder.delivery_fee)}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
-                  <span>Tax:</span>
-                  <span>{formatPrice(selectedOrder.tax)}</span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  fontWeight: '600',
-                  borderTop: '1px solid #e5e7eb',
-                  paddingTop: '0.5rem',
-                }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontWeight: "600",
+                    borderTop: "1px solid #e5e7eb",
+                    paddingTop: "0.5rem",
+                  }}
+                >
                   <span>Total:</span>
-                  <span>{formatPrice(selectedOrder.grandTotal)}</span>
+                  <span>{formatPrice(selectedOrder.total_amount)}</span>
                 </div>
               </div>
 
               <div>
-                <h4 style={{ fontWeight: '500', marginBottom: '0.5rem' }}>Order Status</h4>
-                {getStatusBadge(selectedOrder.status)}
-                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginTop: '0.5rem' }}>
-                  Payment Method: {selectedOrder.paymentMethod}
+                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                  Order Status
+                </h4>
+                <div
+                  style={{
+                    display: "flex",
+                    gap: "0.5rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {getStatusBadge(selectedOrder.order_status, "order")}
+                  {getStatusBadge(selectedOrder.payment_status, "payment")}
+                </div>
+                <p
+                  style={{
+                    color: "#6b7280",
+                    fontSize: "0.875rem",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  Payment Method:{" "}
+                  {selectedOrder.payment_method || "Cash on Delivery"}
                 </p>
+                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                  Order Date: {formatDateTime(selectedOrder.created_at)}
+                </p>
+                {selectedOrder.notes && (
+                  <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                    Notes: {selectedOrder.notes}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                  Quick Actions
+                </h4>
+                <div
+                  style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
+                >
+                  {selectedOrder.order_status !== "confirmed" && (
+                    <button
+                      onClick={() =>
+                        handleStatusUpdate(selectedOrder.id, "confirmed")
+                      }
+                      disabled={updating === selectedOrder.id}
+                      style={{
+                        padding: "0.25rem 0.5rem",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "0.25rem",
+                        fontSize: "0.75rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Confirm Order
+                    </button>
+                  )}
+                  {selectedOrder.order_status !== "preparing" &&
+                    selectedOrder.order_status !== "delivered" && (
+                      <button
+                        onClick={() =>
+                          handleStatusUpdate(selectedOrder.id, "preparing")
+                        }
+                        disabled={updating === selectedOrder.id}
+                        style={{
+                          padding: "0.25rem 0.5rem",
+                          backgroundColor: "#8b5cf6",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Start Preparing
+                      </button>
+                    )}
+                  {selectedOrder.order_status !== "delivered" &&
+                    selectedOrder.order_status !== "cancelled" && (
+                      <button
+                        onClick={() =>
+                          handleStatusUpdate(selectedOrder.id, "delivered")
+                        }
+                        disabled={updating === selectedOrder.id}
+                        style={{
+                          padding: "0.25rem 0.5rem",
+                          backgroundColor: "#10b981",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Mark Delivered
+                      </button>
+                    )}
+                </div>
               </div>
             </div>
           </div>
