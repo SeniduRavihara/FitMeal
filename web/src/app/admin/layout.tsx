@@ -1,8 +1,6 @@
-import AdminHeader from "@/components/admin/AdminHeader";
-import AdminLayoutClient from "@/components/admin/AdminLayoutClient";
-import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminProtection from "@/components/AdminProtection";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { AdminHeader, AdminLayoutClient, AdminSidebar } from "@/shared";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

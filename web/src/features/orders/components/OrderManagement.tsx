@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  OrderFilters,
+  OrderService,
+  OrderWithItems,
+} from "@/supabase/services/OrderService";
+import {
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
@@ -10,11 +15,6 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import React, { useEffect, useState } from "react";
-import {
-  OrderFilters,
-  OrderService,
-  OrderWithItems,
-} from "../../supabase/services/OrderService";
 
 // Order status configuration
 const ORDER_STATUS_CONFIG = {

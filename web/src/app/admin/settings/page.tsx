@@ -1,4 +1,4 @@
-import SettingsManagement from '@/components/admin/SettingsManagement';
+import { SettingsManagement } from "@/features/settings";
 
 export default function SettingsPage() {
   return (
@@ -13,8 +13,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-
-
-
-

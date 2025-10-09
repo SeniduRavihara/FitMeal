@@ -1,12 +1,12 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
 import {
   CarouselItem,
   CarouselItemInsert,
   CarouselItemUpdate,
-} from "../../supabase/services/CarouselService";
+} from "@/supabase/services/CarouselService";
+import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useEffect, useState } from "react";
 import CarouselPreview from "./CarouselPreview";
 
 type CarouselItemFormProps = {

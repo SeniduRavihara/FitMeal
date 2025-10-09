@@ -16,9 +16,17 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false); // For mobile overlay
   const [isCollapsed, setIsCollapsed] = useState(false); // For desktop collapse
+  const [mounted, setMounted] = useState(false);
+
+  // Set mounted state
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close mobile sidebar on escape key
   useEffect(() => {
+    if (!mounted) return;
+
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
         setIsOpen(false);
@@ -27,10 +35,12 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [isOpen]);
+  }, [isOpen, mounted]);
 
   // Prevent body scroll when mobile sidebar is open
   useEffect(() => {
+    if (!mounted) return;
+
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -40,7 +50,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
     return () => {
       document.body.style.overflow = "unset";
     };
-  }, [isOpen]);
+  }, [isOpen, mounted]);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);

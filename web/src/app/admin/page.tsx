@@ -1,7 +1,9 @@
-import DashboardStats from '@/components/admin/DashboardStats';
-import RecentOrders from '@/components/admin/RecentOrders';
-import PopularMeals from '@/components/admin/PopularMeals';
-import RevenueChart from '@/components/admin/RevenueChart';
+import {
+  DashboardStats,
+  PopularMeals,
+  RecentOrders,
+  RevenueChart,
+} from "@/features/dashboard";
 
 export default function AdminDashboard() {
   return (
@@ -28,8 +30,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-
-
-
-

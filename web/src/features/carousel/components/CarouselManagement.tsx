@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  CarouselItem,
+  CarouselService,
+} from "@/supabase/services/CarouselService";
+import {
   ArrowDownIcon,
   ArrowUpIcon,
   EyeIcon,
@@ -11,10 +15,6 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import {
-  CarouselItem,
-  CarouselService,
-} from "../../supabase/services/CarouselService";
 import CarouselItemForm from "./CarouselItemForm";
 import CarouselPreview from "./CarouselPreview";
 

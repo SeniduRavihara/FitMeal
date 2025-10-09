@@ -2,18 +2,19 @@
 
 import { useSidebar } from "@/context/SidebarContext";
 import {
-    CalendarIcon,
-    ChartBarIcon,
-    ChevronLeftIcon,
-    ChevronRightIcon,
-    CogIcon,
-    HomeIcon,
-    ShoppingBagIcon,
-    UserGroupIcon,
-    XMarkIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CogIcon,
+  HomeIcon,
+  ShoppingBagIcon,
+  UserGroupIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: HomeIcon },
@@ -28,6 +29,15 @@ const navigation = [
 export default function AdminSidebar() {
   const { isOpen, isCollapsed, closeSidebar, toggleCollapse } = useSidebar();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <>
