@@ -19,6 +19,8 @@ export interface Order {
     phone_number: string;
     address_line1: string;
     address_line2?: string;
+    latitude?: number;
+    longitude?: number;
   };
   subtotal: number;
   delivery_fee: number;

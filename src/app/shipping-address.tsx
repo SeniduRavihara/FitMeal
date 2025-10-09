@@ -1,371 +1,367 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Modal, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { AddressForm } from "../components/AddressForm";
 import { AppText } from "../components/AppText";
-
-// Mock address data
-const mockAddresses = [
-  {
-    id: "1",
-    name: "Home",
-    street: "123 Main Street",
-    city: "New York",
-    state: "NY",
-    zipCode: "10001",
-    country: "United States",
-    isDefault: true,
-    phone: "+1 (555) 123-4567",
-  },
-  {
-    id: "2",
-    name: "Office",
-    street: "456 Business Ave",
-    city: "New York",
-    state: "NY",
-    zipCode: "10002",
-    country: "United States",
-    isDefault: false,
-    phone: "+1 (555) 987-6543",
-  },
-];
+import { CustomAlert } from "../components/CustomAlert";
+import { useCustomAlert } from "../hooks/useCustomAlert";
+import { Address, AddressService } from "../services/AddressService";
 
 export default function ShippingAddressPage() {
-  const [addresses, setAddresses] = useState(mockAddresses);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingAddress, setEditingAddress] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    street: "",
-    city: "",
-    state: "",
-    zipCode: "",
-    country: "United States",
-    phone: "",
-  });
+  const {
+    showSuccess,
+    showError,
+    visible,
+    alertConfig,
+    handleConfirm,
+    handleCancel,
+  } = useCustomAlert();
 
-  const handleAddAddress = () => {
-    if (
-      !formData.name ||
-      !formData.street ||
-      !formData.city ||
-      !formData.state ||
-      !formData.zipCode
-    ) {
-      Alert.alert("Error", "Please fill in all required fields");
-      return;
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadAddresses();
+  }, []);
+
+  const loadAddresses = async () => {
+    try {
+      setLoading(true);
+      const userAddresses = await AddressService.getUserAddresses();
+      setAddresses(userAddresses);
+    } catch (error) {
+      console.error("Error loading addresses:", error);
+      showError("Error", "Failed to load addresses. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    const newAddress = {
-      id: Date.now().toString(),
-      ...formData,
-      isDefault: addresses.length === 0,
-    };
-
-    setAddresses([...addresses, newAddress]);
-    setShowAddForm(false);
-    setFormData({
-      name: "",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "United States",
-      phone: "",
-    });
   };
 
-  const handleEditAddress = (address) => {
+  const handleAddNewAddress = () => {
+    setEditingAddress(null);
+    setShowAddressForm(true);
+  };
+
+  const handleEditAddress = (address: Address) => {
     setEditingAddress(address);
-    setFormData({
-      name: address.name,
-      street: address.street,
-      city: address.city,
-      state: address.state,
-      zipCode: address.zipCode,
-      country: address.country,
-      phone: address.phone,
-    });
-    setShowAddForm(true);
+    setShowAddressForm(true);
   };
 
-  const handleUpdateAddress = () => {
-    if (
-      !formData.name ||
-      !formData.street ||
-      !formData.city ||
-      !formData.state ||
-      !formData.zipCode
-    ) {
-      Alert.alert("Error", "Please fill in all required fields");
-      return;
+  const handleAddressFormSubmit = async (addressData: any) => {
+    try {
+      if (editingAddress) {
+        // Update existing address
+        const updatedAddress = await AddressService.updateAddress(
+          editingAddress.id,
+          addressData
+        );
+        setAddresses((prev) =>
+          prev.map((addr) =>
+            addr.id === editingAddress.id ? updatedAddress : addr
+          )
+        );
+        showSuccess("Success!", "Address updated successfully.");
+      } else {
+        // Create new address
+        const newAddress = await AddressService.createAddress(addressData);
+        setAddresses((prev) => [newAddress, ...prev]);
+        showSuccess("Success!", "Address saved successfully.");
+      }
+      setShowAddressForm(false);
+      setEditingAddress(null);
+    } catch (error) {
+      console.error("Error saving address:", error);
+      showError("Error", "Failed to save address. Please try again.");
     }
-
-    setAddresses(
-      addresses.map((addr) =>
-        addr.id === editingAddress.id ? { ...addr, ...formData } : addr
-      )
-    );
-
-    setShowAddForm(false);
-    setEditingAddress(null);
-    setFormData({
-      name: "",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "United States",
-      phone: "",
-    });
   };
 
-  const handleDeleteAddress = (addressId) => {
-    Alert.alert(
+  const handleDeleteAddress = (address: Address) => {
+    showError(
       "Delete Address",
-      "Are you sure you want to delete this address?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: () => {
-            setAddresses(addresses.filter((addr) => addr.id !== addressId));
-          },
-        },
-      ]
+      `Are you sure you want to delete "${address.full_name}"'s address?`,
+      () => {
+        // Confirm delete
+        deleteAddress(address.id);
+      },
+      () => {
+        // Cancel - do nothing
+      }
     );
   };
 
-  const handleSetDefault = (addressId) => {
-    setAddresses(
-      addresses.map((addr) => ({
-        ...addr,
-        isDefault: addr.id === addressId,
-      }))
-    );
+  const deleteAddress = async (addressId: string) => {
+    try {
+      await AddressService.deleteAddress(addressId);
+      setAddresses((prev) => prev.filter((addr) => addr.id !== addressId));
+      showSuccess("Success!", "Address deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      showError("Error", "Failed to delete address. Please try again.");
+    }
   };
 
-  const cancelForm = () => {
-    setShowAddForm(false);
-    setEditingAddress(null);
-    setFormData({
-      name: "",
-      street: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      country: "United States",
-      phone: "",
-    });
+  const handleSetDefault = async (address: Address) => {
+    try {
+      await AddressService.setDefaultAddress(address.id);
+      setAddresses((prev) =>
+        prev.map((addr) => ({
+          ...addr,
+          is_default: addr.id === address.id,
+        }))
+      );
+      showSuccess("Success!", "Default address updated successfully.");
+    } catch (error) {
+      console.error("Error setting default address:", error);
+      showError("Error", "Failed to set default address. Please try again.");
+    }
   };
+
+  const formatAddress = (address: Address) => {
+    const parts = [address.address_line1];
+    if (address.address_line2) {
+      parts.push(address.address_line2);
+    }
+    return parts.join(", ");
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <AppText variant="body" color="secondary">
+            Loading addresses...
+          </AppText>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
       {/* Header */}
-      <View className="px-6 pt-4 pb-2 bg-white border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center">
-            <TouchableOpacity onPress={() => router.back()} className="mr-4">
-              <Ionicons name="arrow-back" size={24} color="#FB923C" />
-            </TouchableOpacity>
-            <AppText className="text-xl font-bold text-gray-900">
-              Shipping Address
-            </AppText>
-          </View>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+          backgroundColor: "white",
+          borderBottomWidth: 1,
+          borderBottomColor: "#E5E5E5",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <TouchableOpacity
-            onPress={() => setShowAddForm(true)}
-            className="bg-orange-500 px-4 py-2 rounded-lg"
+            onPress={() => router.back()}
+            style={{ marginRight: 16 }}
           >
-            <AppText className="text-white font-medium">Add New</AppText>
+            <Ionicons name="arrow-back" size={24} color="#FB923C" />
           </TouchableOpacity>
+          <AppText variant="h3" weight="semibold" color="primary">
+            Shipping Address
+          </AppText>
         </View>
+        <TouchableOpacity
+          onPress={handleAddNewAddress}
+          style={{
+            backgroundColor: "#FB923C",
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            borderRadius: 8,
+          }}
+        >
+          <AppText variant="body" weight="medium" color="white">
+            Add New
+          </AppText>
+        </TouchableOpacity>
       </View>
 
-      {showAddForm ? (
-        /* Add/Edit Address Form */
-        <ScrollView className="flex-1 px-6 py-4">
-          <View className="bg-white rounded-xl p-6 shadow-sm">
-            <AppText className="text-lg font-semibold text-gray-900 mb-6">
-              {editingAddress ? "Edit Address" : "Add New Address"}
-            </AppText>
-
-            <View className="space-y-4">
-              <View>
-                <AppText className="text-sm font-medium text-gray-700 mb-2">
-                  Address Name *
+      {showAddressForm ? (
+        /* Address Form Modal */
+        <Modal
+          visible={showAddressForm}
+          animationType="slide"
+          presentationStyle="pageSheet"
+        >
+          <SafeAreaView style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 20,
+                paddingVertical: 16,
+                backgroundColor: "white",
+                borderBottomWidth: 1,
+                borderBottomColor: "#E5E5E5",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setShowAddressForm(false);
+                    setEditingAddress(null);
+                  }}
+                  style={{ marginRight: 16 }}
+                >
+                  <Ionicons name="close" size={24} color="#374151" />
+                </TouchableOpacity>
+                <AppText variant="h3" weight="semibold" color="primary">
+                  {editingAddress ? "Edit Address" : "Add New Address"}
                 </AppText>
-                <TextInput
-                  value={formData.name}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, name: text })
-                  }
-                  placeholder="e.g., Home, Office"
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View>
-                <AppText className="text-sm font-medium text-gray-700 mb-2">
-                  Street Address *
-                </AppText>
-                <TextInput
-                  value={formData.street}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, street: text })
-                  }
-                  placeholder="123 Main Street"
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                  placeholderTextColor="#9CA3AF"
-                />
-              </View>
-
-              <View className="flex-row space-x-3">
-                <View className="flex-1">
-                  <AppText className="text-sm font-medium text-gray-700 mb-2">
-                    City *
-                  </AppText>
-                  <TextInput
-                    value={formData.city}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, city: text })
-                    }
-                    placeholder="New York"
-                    className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-                <View className="w-24">
-                  <AppText className="text-sm font-medium text-gray-700 mb-2">
-                    State *
-                  </AppText>
-                  <TextInput
-                    value={formData.state}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, state: text })
-                    }
-                    placeholder="NY"
-                    className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-                <View className="w-24">
-                  <AppText className="text-sm font-medium text-gray-700 mb-2">
-                    ZIP *
-                  </AppText>
-                  <TextInput
-                    value={formData.zipCode}
-                    onChangeText={(text) =>
-                      setFormData({ ...formData, zipCode: text })
-                    }
-                    placeholder="10001"
-                    className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                    placeholderTextColor="#9CA3AF"
-                  />
-                </View>
-              </View>
-
-              <View>
-                <AppText className="text-sm font-medium text-gray-700 mb-2">
-                  Phone Number
-                </AppText>
-                <TextInput
-                  value={formData.phone}
-                  onChangeText={(text) =>
-                    setFormData({ ...formData, phone: text })
-                  }
-                  placeholder="+1 (555) 123-4567"
-                  className="border border-gray-300 rounded-lg px-4 py-3 text-gray-900"
-                  placeholderTextColor="#9CA3AF"
-                />
               </View>
             </View>
 
-            <View className="flex-row space-x-3 mt-6">
-              <TouchableOpacity
-                onPress={cancelForm}
-                className="flex-1 border border-gray-300 py-3 rounded-lg"
-              >
-                <AppText className="text-gray-700 text-center font-medium">
-                  Cancel
-                </AppText>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={
-                  editingAddress ? handleUpdateAddress : handleAddAddress
-                }
-                className="flex-1 bg-orange-500 py-3 rounded-lg"
-              >
-                <AppText className="text-white text-center font-medium">
-                  {editingAddress ? "Update" : "Add Address"}
-                </AppText>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
+            <AddressForm
+              initialData={
+                editingAddress
+                  ? {
+                      full_name: editingAddress.full_name,
+                      phone_number: editingAddress.phone_number,
+                      address_line1: editingAddress.address_line1,
+                      address_line2: editingAddress.address_line2,
+                      latitude: editingAddress.latitude,
+                      longitude: editingAddress.longitude,
+                      is_default: editingAddress.is_default,
+                    }
+                  : undefined
+              }
+              onSubmit={handleAddressFormSubmit}
+              onCancel={() => {
+                setShowAddressForm(false);
+                setEditingAddress(null);
+              }}
+              title={editingAddress ? "Edit Address" : "Add New Address"}
+              submitButtonText={
+                editingAddress ? "Update Address" : "Save Address"
+              }
+            />
+          </SafeAreaView>
+        </Modal>
       ) : (
         /* Address List */
         <ScrollView
-          className="flex-1 px-6"
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 20 }}
           showsVerticalScrollIndicator={false}
         >
           {addresses.length === 0 ? (
-            <View className="items-center py-20">
+            <View
+              style={{
+                alignItems: "center",
+                justifyContent: "center",
+                paddingVertical: 80,
+              }}
+            >
               <Ionicons name="location-outline" size={64} color="#D1D5DB" />
-              <AppText className="text-lg font-medium text-gray-500 mt-4 text-center">
+              <AppText
+                variant="h4"
+                weight="medium"
+                color="secondary"
+                style={{ marginTop: 16, textAlign: "center" }}
+              >
                 No addresses saved
               </AppText>
-              <AppText className="text-base text-gray-400 text-center mt-2">
+              <AppText
+                variant="body"
+                color="secondary"
+                style={{ marginTop: 8, textAlign: "center" }}
+              >
                 Add your first shipping address
               </AppText>
             </View>
           ) : (
-            <View className="py-4">
+            <View style={{ gap: 16 }}>
               {addresses.map((address) => (
                 <View
                   key={address.id}
-                  className="bg-white rounded-xl p-4 mb-4 shadow-sm"
+                  style={{
+                    backgroundColor: "white",
+                    borderRadius: 16,
+                    padding: 16,
+                    borderWidth: 2,
+                    borderColor: address.is_default ? "#FB923C" : "#E5E5E5",
+                  }}
                 >
-                  <View className="flex-row justify-between items-start mb-3">
-                    <View className="flex-1">
-                      <View className="flex-row items-center">
-                        <AppText className="text-base font-semibold text-gray-900">
-                          {address.name}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginBottom: 4,
+                        }}
+                      >
+                        <AppText variant="h4" weight="semibold" color="primary">
+                          {address.full_name}
                         </AppText>
-                        {address.isDefault && (
-                          <View className="ml-2 bg-orange-100 px-2 py-1 rounded-full">
-                            <AppText className="text-xs font-medium text-orange-600">
+                        {address.is_default && (
+                          <View
+                            style={{
+                              marginLeft: 8,
+                              backgroundColor: "#FEF3C7",
+                              paddingHorizontal: 8,
+                              paddingVertical: 4,
+                              borderRadius: 12,
+                            }}
+                          >
+                            <AppText
+                              variant="caption"
+                              weight="medium"
+                              color="#D97706"
+                            >
                               Default
                             </AppText>
                           </View>
                         )}
                       </View>
-                      <AppText className="text-sm text-gray-600 mt-1">
-                        {address.street}
+                      <AppText
+                        variant="body"
+                        color="secondary"
+                        style={{ marginBottom: 4 }}
+                      >
+                        {formatAddress(address)}
                       </AppText>
-                      <AppText className="text-sm text-gray-600">
-                        {address.city}, {address.state} {address.zipCode}
+                      <AppText variant="body" color="secondary">
+                        {address.phone_number}
                       </AppText>
-                      <AppText className="text-sm text-gray-600">
-                        {address.country}
-                      </AppText>
-                      {address.phone && (
-                        <AppText className="text-sm text-gray-600 mt-1">
-                          {address.phone}
-                        </AppText>
+                      {address.latitude && address.longitude && (
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginTop: 4,
+                          }}
+                        >
+                          <Ionicons name="location" size={14} color="#10B981" />
+                          <AppText
+                            variant="caption"
+                            color="secondary"
+                            style={{ marginLeft: 4 }}
+                          >
+                            GPS: {address.latitude.toFixed(4)},{" "}
+                            {address.longitude.toFixed(4)}
+                          </AppText>
+                        </View>
                       )}
                     </View>
                     <TouchableOpacity
-                      onPress={() => handleDeleteAddress(address.id)}
-                      className="ml-2"
+                      onPress={() => handleDeleteAddress(address)}
+                      style={{ marginLeft: 8 }}
                     >
                       <Ionicons
                         name="trash-outline"
@@ -375,22 +371,36 @@ export default function ShippingAddressPage() {
                     </TouchableOpacity>
                   </View>
 
-                  <View className="flex-row space-x-3">
-                    {!address.isDefault && (
+                  <View style={{ flexDirection: "row", gap: 12 }}>
+                    {!address.is_default && (
                       <TouchableOpacity
-                        onPress={() => handleSetDefault(address.id)}
-                        className="flex-1 border border-orange-200 py-2 rounded-lg"
+                        onPress={() => handleSetDefault(address)}
+                        style={{
+                          flex: 1,
+                          borderWidth: 1,
+                          borderColor: "#FB923C",
+                          paddingVertical: 12,
+                          borderRadius: 8,
+                          alignItems: "center",
+                        }}
                       >
-                        <AppText className="text-orange-500 text-center font-medium">
+                        <AppText variant="body" weight="medium" color="#FB923C">
                           Set as Default
                         </AppText>
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity
                       onPress={() => handleEditAddress(address)}
-                      className="flex-1 border border-gray-300 py-2 rounded-lg"
+                      style={{
+                        flex: 1,
+                        borderWidth: 1,
+                        borderColor: "#D1D5DB",
+                        paddingVertical: 12,
+                        borderRadius: 8,
+                        alignItems: "center",
+                      }}
                     >
-                      <AppText className="text-gray-700 text-center font-medium">
+                      <AppText variant="body" weight="medium" color="secondary">
                         Edit
                       </AppText>
                     </TouchableOpacity>
@@ -401,6 +411,16 @@ export default function ShippingAddressPage() {
           )}
         </ScrollView>
       )}
+
+      {/* Custom Alert */}
+      <CustomAlert
+        visible={visible}
+        title={alertConfig?.title || ""}
+        message={alertConfig?.message || ""}
+        type={alertConfig?.type || "info"}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </SafeAreaView>
   );
 }

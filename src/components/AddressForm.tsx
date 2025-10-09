@@ -4,6 +4,7 @@ import { ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 import { AddressService, CreateAddressData } from "../services/AddressService";
 import { AppText } from "./AppText";
 import { Button } from "./Button";
+import { LocationPicker } from "./LocationPicker";
 
 interface AddressFormProps {
   initialData?: Partial<CreateAddressData>;
@@ -25,6 +26,8 @@ export function AddressForm({
     phone_number: initialData?.phone_number || "",
     address_line1: initialData?.address_line1 || "",
     address_line2: initialData?.address_line2 || "",
+    latitude: initialData?.latitude,
+    longitude: initialData?.longitude,
     is_default: initialData?.is_default || false,
   });
 
@@ -33,10 +36,27 @@ export function AddressForm({
 
   const handleInputChange = (
     field: keyof CreateAddressData,
-    value: string | boolean
+    value: string | boolean | number | undefined
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear errors when user starts typing
+    if (errors.length > 0) {
+      setErrors([]);
+    }
+  };
+
+  const handleLocationSelect = (location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  }) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: location.latitude,
+      longitude: location.longitude,
+      address_line1: location.address,
+    }));
+    // Clear errors when location is selected
     if (errors.length > 0) {
       setErrors([]);
     }
@@ -114,7 +134,7 @@ export function AddressForm({
               <AppText
                 key={index}
                 variant="body"
-                color="#DC2626"
+                color="primary"
                 style={{ marginBottom: 4 }}
               >
                 • {error}
@@ -169,6 +189,40 @@ export function AddressForm({
               onChangeText={(value) => handleInputChange("phone_number", value)}
               keyboardType="phone-pad"
             />
+          </View>
+
+          {/* Location Picker */}
+          <View style={{ marginBottom: 16 }}>
+            <AppText
+              variant="body"
+              weight="medium"
+              color="primary"
+              style={{ marginBottom: 8 }}
+            >
+              Delivery Location *
+            </AppText>
+            <LocationPicker
+              onLocationSelect={handleLocationSelect}
+              initialLocation={
+                formData.latitude && formData.longitude
+                  ? {
+                      latitude: formData.latitude,
+                      longitude: formData.longitude,
+                      address: formData.address_line1,
+                    }
+                  : undefined
+              }
+              placeholder="Select your delivery location"
+            />
+            {errors.some((e) => e.includes("Address line 1")) && (
+              <AppText
+                variant="caption"
+                color="primary"
+                style={{ marginTop: 4 }}
+              >
+                Please select a delivery location
+              </AppText>
+            )}
           </View>
 
           {/* Address Line 1 */}

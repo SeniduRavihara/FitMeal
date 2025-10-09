@@ -7,6 +7,8 @@ export interface Address {
   phone_number: string;
   address_line1: string;
   address_line2?: string;
+  latitude?: number;
+  longitude?: number;
   is_default: boolean;
   created_at: string;
   updated_at: string;
@@ -17,6 +19,8 @@ export interface CreateAddressData {
   phone_number: string;
   address_line1: string;
   address_line2?: string;
+  latitude?: number;
+  longitude?: number;
   is_default?: boolean;
 }
 
@@ -25,6 +29,8 @@ export interface UpdateAddressData {
   phone_number?: string;
   address_line1?: string;
   address_line2?: string;
+  latitude?: number;
+  longitude?: number;
   is_default?: boolean;
 }
 

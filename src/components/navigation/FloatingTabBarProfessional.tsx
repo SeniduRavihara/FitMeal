@@ -42,7 +42,7 @@ const tabs = [
     icon: "person-outline",
     activeIcon: "person",
     badge: null,
-  },
+  }
 ];
 
 type FloatingTabBarProps = {
@@ -108,6 +108,7 @@ export function FloatingTabBarProfessional({
       subscriptions: "/(tabs)/subscriptions",
       orders: "/(tabs)/orders",
       profile: "/(tabs)/profile",
+      locationpicker: "/(tabs)/locationpicker",
     };
 
     const route = routeMapping[tabId];
