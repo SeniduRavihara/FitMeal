@@ -554,7 +554,7 @@ export default function OrderManagement() {
                       <EyeIcon style={{ width: "1rem", height: "1rem" }} />
                     </button>
                     <button
-                      onClick={() => console.log("Edit order:", order.id)}
+                      onClick={() => setSelectedOrder(order)}
                       style={{ ...styles.iconButton, color: "#7c3aed" }}
                       title="Edit Order"
                       disabled={updating === order.id}
@@ -766,7 +766,14 @@ export default function OrderManagement() {
                 )}
 
               <div>
-                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                <h4
+                  style={{
+                    fontWeight: "600",
+                    marginBottom: "0.75rem",
+                    color: "#1f2937",
+                    fontSize: "1.125rem",
+                  }}
+                >
                   Order Items
                 </h4>
                 {selectedOrder.order_items?.map((item, index) => (
@@ -782,63 +789,88 @@ export default function OrderManagement() {
                           : "none",
                     }}
                   >
-                    <span>
+                    <span style={{ color: "#1f2937", fontWeight: "500" }}>
                       {item.meal_name || "Custom Meal"} x{item.quantity}
                     </span>
-                    <span>
+                    <span style={{ color: "#1f2937", fontWeight: "600" }}>
                       {formatPrice(item.price_per_item * item.quantity)}
                     </span>
                   </div>
-                )) || <div>No items found</div>}
+                )) || <div style={{ color: "#6b7280" }}>No items found</div>}
               </div>
 
               <div>
-                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                <h4
+                  style={{
+                    fontWeight: "600",
+                    marginBottom: "0.75rem",
+                    color: "#1f2937",
+                    fontSize: "1.125rem",
+                  }}
+                >
                   Payment Summary
                 </h4>
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    marginBottom: "0.25rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
-                  <span>Subtotal:</span>
-                  <span>{formatPrice(selectedOrder.subtotal)}</span>
+                  <span style={{ color: "#374151", fontWeight: "500" }}>
+                    Subtotal:
+                  </span>
+                  <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                    {formatPrice(selectedOrder.subtotal)}
+                  </span>
                 </div>
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    marginBottom: "0.25rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
-                  <span>Delivery Fee:</span>
-                  <span>{formatPrice(selectedOrder.delivery_fee)}</span>
+                  <span style={{ color: "#374151", fontWeight: "500" }}>
+                    Delivery Fee:
+                  </span>
+                  <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                    {formatPrice(selectedOrder.delivery_fee)}
+                  </span>
                 </div>
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    fontWeight: "600",
-                    borderTop: "1px solid #e5e7eb",
-                    paddingTop: "0.5rem",
+                    fontWeight: "700",
+                    borderTop: "2px solid #e5e7eb",
+                    paddingTop: "0.75rem",
+                    fontSize: "1.125rem",
                   }}
                 >
-                  <span>Total:</span>
-                  <span>{formatPrice(selectedOrder.total_amount)}</span>
+                  <span style={{ color: "#1f2937" }}>Total:</span>
+                  <span style={{ color: "#1f2937" }}>
+                    {formatPrice(selectedOrder.total_amount)}
+                  </span>
                 </div>
               </div>
 
               <div>
-                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                <h4
+                  style={{
+                    fontWeight: "600",
+                    marginBottom: "0.75rem",
+                    color: "#1f2937",
+                    fontSize: "1.125rem",
+                  }}
+                >
                   Order Status
                 </h4>
                 <div
                   style={{
                     display: "flex",
                     gap: "0.5rem",
-                    marginBottom: "0.5rem",
+                    marginBottom: "0.75rem",
                   }}
                 >
                   {getStatusBadge(selectedOrder.order_status, "order")}
@@ -846,26 +878,54 @@ export default function OrderManagement() {
                 </div>
                 <p
                   style={{
-                    color: "#6b7280",
-                    fontSize: "0.875rem",
+                    color: "#374151",
+                    fontSize: "0.95rem",
                     marginTop: "0.5rem",
+                    fontWeight: "500",
                   }}
                 >
                   Payment Method:{" "}
-                  {selectedOrder.payment_method || "Cash on Delivery"}
+                  <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                    {selectedOrder.payment_method || "Cash on Delivery"}
+                  </span>
                 </p>
-                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-                  Order Date: {formatDateTime(selectedOrder.created_at)}
+                <p
+                  style={{
+                    color: "#374151",
+                    fontSize: "0.95rem",
+                    fontWeight: "500",
+                  }}
+                >
+                  Order Date:{" "}
+                  <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                    {formatDateTime(selectedOrder.created_at)}
+                  </span>
                 </p>
                 {selectedOrder.notes && (
-                  <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
-                    Notes: {selectedOrder.notes}
+                  <p
+                    style={{
+                      color: "#374151",
+                      fontSize: "0.95rem",
+                      fontWeight: "500",
+                    }}
+                  >
+                    Notes:{" "}
+                    <span style={{ color: "#1f2937", fontWeight: "600" }}>
+                      {selectedOrder.notes}
+                    </span>
                   </p>
                 )}
               </div>
 
               <div>
-                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                <h4
+                  style={{
+                    fontWeight: "600",
+                    marginBottom: "0.75rem",
+                    color: "#1f2937",
+                    fontSize: "1.125rem",
+                  }}
+                >
                   Quick Actions
                 </h4>
                 <div
@@ -928,6 +988,26 @@ export default function OrderManagement() {
                         }}
                       >
                         Mark Delivered
+                      </button>
+                    )}
+                  {selectedOrder.order_status !== "cancelled" &&
+                    selectedOrder.order_status !== "delivered" && (
+                      <button
+                        onClick={() =>
+                          handleStatusUpdate(selectedOrder.id, "cancelled")
+                        }
+                        disabled={updating === selectedOrder.id}
+                        style={{
+                          padding: "0.25rem 0.5rem",
+                          backgroundColor: "#ef4444",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "0.25rem",
+                          fontSize: "0.75rem",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Cancel Order
                       </button>
                     )}
                 </div>

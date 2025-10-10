@@ -89,24 +89,46 @@ export default function UserManagement() {
             </button>
           )}
         </div>
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-4">
           <input
             type="text"
             placeholder="Search users..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block w-64 px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm text-gray-900 placeholder-gray-500 bg-white"
+            style={{
+              padding: "0.75rem 1rem",
+              fontSize: "0.875rem",
+              color: "#1f2937",
+              backgroundColor: "#ffffff",
+            }}
           />
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="block rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+            className="block px-4 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm text-gray-900 bg-white"
+            style={{
+              padding: "0.75rem 1rem",
+              fontSize: "0.875rem",
+              color: "#1f2937",
+              backgroundColor: "#ffffff",
+            }}
           >
-            <option value="all">All Users</option>
-            <option value="user">Users</option>
-            <option value="admin">Admins</option>
-            <option value="moderator">Moderators</option>
-            <option value="super_admin">Super Admins</option>
+            <option value="all" style={{ color: "#1f2937" }}>
+              All Users
+            </option>
+            <option value="user" style={{ color: "#1f2937" }}>
+              Users
+            </option>
+            <option value="admin" style={{ color: "#1f2937" }}>
+              Admins
+            </option>
+            <option value="moderator" style={{ color: "#1f2937" }}>
+              Moderators
+            </option>
+            <option value="super_admin" style={{ color: "#1f2937" }}>
+              Super Admins
+            </option>
           </select>
         </div>
       </div>
@@ -125,25 +147,25 @@ export default function UserManagement() {
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   User
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Phone
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Join Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Last Updated
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
