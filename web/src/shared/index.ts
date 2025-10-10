@@ -1,5 +1,6 @@
 // Shared components exports
 export { default as ImageUpload } from "./components/ImageUpload";
+export { default as MapView } from "./components/MapView";
 
 // Layout exports
 export { default as AdminHeader } from "./layouts/admin/AdminHeader";

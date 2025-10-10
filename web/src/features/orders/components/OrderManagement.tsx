@@ -1,5 +1,6 @@
 "use client";
 
+import { MapView } from "@/shared";
 import {
   OrderFilters,
   OrderService,
@@ -239,6 +240,7 @@ export default function OrderManagement() {
     null
   );
   const [updating, setUpdating] = useState<string | null>(null);
+  const [showFullScreenMap, setShowFullScreenMap] = useState(false);
 
   // Fetch orders on component mount
   useEffect(() => {
@@ -654,23 +656,114 @@ export default function OrderManagement() {
               style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
             >
               <div>
-                <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
+                <h4
+                  style={{
+                    fontWeight: "600",
+                    marginBottom: "0.75rem",
+                    color: "#1f2937",
+                    fontSize: "1.125rem",
+                  }}
+                >
                   Customer Information
                 </h4>
-                <p>
+                <p
+                  style={{
+                    color: "#1f2937",
+                    fontWeight: "500",
+                    marginBottom: "0.5rem",
+                    fontSize: "1rem",
+                  }}
+                >
                   {selectedOrder.delivery_address?.full_name ||
                     "Unknown Customer"}
                 </p>
-                <p style={{ color: "#6b7280" }}>
+                <p
+                  style={{
+                    color: "#374151",
+                    marginBottom: "0.5rem",
+                    fontSize: "0.95rem",
+                  }}
+                >
+                  📞{" "}
                   {selectedOrder.delivery_address?.phone_number || "No phone"}
                 </p>
-                <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>
+                <p
+                  style={{
+                    color: "#374151",
+                    fontSize: "0.95rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  📍{" "}
                   {selectedOrder.delivery_address?.address_line1 ||
                     "No address"}
                   {selectedOrder.delivery_address?.address_line2 &&
                     `, ${selectedOrder.delivery_address.address_line2}`}
                 </p>
+                {selectedOrder.delivery_address?.latitude &&
+                  selectedOrder.delivery_address?.longitude && (
+                    <p
+                      style={{
+                        color: "#1f2937",
+                        fontSize: "0.875rem",
+                        marginTop: "0.5rem",
+                        fontWeight: "500",
+                        backgroundColor: "#f3f4f6",
+                        padding: "0.5rem",
+                        borderRadius: "0.375rem",
+                        border: "1px solid #e5e7eb",
+                      }}
+                    >
+                      🗺️ GPS:{" "}
+                      {selectedOrder.delivery_address.latitude.toFixed(6)},{" "}
+                      {selectedOrder.delivery_address.longitude.toFixed(6)}
+                    </p>
+                  )}
               </div>
+
+              {/* Delivery Location Map Button */}
+              {selectedOrder.delivery_address?.latitude &&
+                selectedOrder.delivery_address?.longitude && (
+                  <div>
+                    <h4
+                      style={{
+                        fontWeight: "600",
+                        marginBottom: "0.75rem",
+                        color: "#1f2937",
+                        fontSize: "1.125rem",
+                      }}
+                    >
+                      Delivery Location
+                    </h4>
+                    <button
+                      onClick={() => setShowFullScreenMap(true)}
+                      style={{
+                        width: "100%",
+                        padding: "1rem",
+                        backgroundColor: "#3b82f6",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "0.5rem",
+                        fontSize: "1rem",
+                        fontWeight: "600",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.5rem",
+                        transition: "background-color 0.2s",
+                      }}
+                      onMouseOver={(e) => {
+                        e.currentTarget.style.backgroundColor = "#2563eb";
+                      }}
+                      onMouseOut={(e) => {
+                        e.currentTarget.style.backgroundColor = "#3b82f6";
+                      }}
+                    >
+                      🗺️ Open Full-Screen Map for Delivery
+                    </button>
+                  </div>
+                )}
 
               <div>
                 <h4 style={{ fontWeight: "500", marginBottom: "0.5rem" }}>
@@ -843,6 +936,99 @@ export default function OrderManagement() {
           </div>
         </div>
       )}
+
+      {/* Full-Screen Map Modal */}
+      {showFullScreenMap &&
+        selectedOrder?.delivery_address?.latitude &&
+        selectedOrder?.delivery_address?.longitude && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "white",
+              zIndex: 9999,
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                padding: "1rem",
+                backgroundColor: "#1f2937",
+                color: "white",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                borderBottom: "1px solid #374151",
+              }}
+            >
+              <div>
+                <h2
+                  style={{ margin: 0, fontSize: "1.25rem", fontWeight: "600" }}
+                >
+                  🚚 Delivery Location
+                </h2>
+                <p
+                  style={{
+                    margin: "0.25rem 0 0 0",
+                    fontSize: "0.875rem",
+                    color: "#d1d5db",
+                  }}
+                >
+                  Order #
+                  {selectedOrder.order_number || selectedOrder.id.slice(0, 8)}
+                </p>
+                <p
+                  style={{
+                    margin: "0.5rem 0 0 0",
+                    fontSize: "0.875rem",
+                    color: "#f3f4f6",
+                    fontWeight: "500",
+                  }}
+                >
+                  📍{" "}
+                  {selectedOrder.delivery_address?.address_line1 ||
+                    "No address"}
+                  {selectedOrder.delivery_address?.address_line2 &&
+                    `, ${selectedOrder.delivery_address.address_line2}`}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowFullScreenMap(false)}
+                style={{
+                  backgroundColor: "transparent",
+                  border: "none",
+                  color: "white",
+                  fontSize: "1.5rem",
+                  cursor: "pointer",
+                  padding: "0.5rem",
+                  borderRadius: "0.25rem",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Full-Screen Map */}
+            <div style={{ flex: 1, position: "relative" }}>
+              <MapView
+                latitude={selectedOrder.delivery_address.latitude}
+                longitude={selectedOrder.delivery_address.longitude}
+                address={`${selectedOrder.delivery_address.address_line1}${
+                  selectedOrder.delivery_address.address_line2
+                    ? `, ${selectedOrder.delivery_address.address_line2}`
+                    : ""
+                }`}
+                height="100%"
+                zoom={18}
+              />
+            </div>
+          </div>
+        )}
     </div>
   );
 }

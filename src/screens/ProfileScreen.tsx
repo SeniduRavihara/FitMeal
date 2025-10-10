@@ -126,9 +126,9 @@ export function ProfileScreen() {
             <AppText className="text-xl font-bold text-gray-900 mb-1">
               {session?.user?.user_metadata?.name || "User"}
             </AppText>
-            <AppText className="text-base text-gray-500 mb-1">
+            {/* <AppText className="text-base text-gray-500 mb-1">
               {session?.user?.phone || "No phone number"}
-            </AppText>
+            </AppText> */}
             <AppText className="text-base text-gray-500">
               {session?.user?.email || "No email"}
             </AppText>
@@ -166,7 +166,7 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Create Request */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             className="flex-row items-center py-4"
             onPress={() => handleSettings("create-request")}
           >
@@ -181,7 +181,7 @@ export function ProfileScreen() {
               Create Request
             </AppText>
             <Ionicons name="chevron-forward" size={20} color="#FB923C" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Privacy Policy */}
           <TouchableOpacity
@@ -198,7 +198,7 @@ export function ProfileScreen() {
           </TouchableOpacity>
 
           {/* Settings */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             className="flex-row items-center py-4"
             onPress={() => handleSettings("settings")}
           >
@@ -209,7 +209,7 @@ export function ProfileScreen() {
               Settings
             </AppText>
             <Ionicons name="chevron-forward" size={20} color="#FB923C" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           {/* Log out */}
           <TouchableOpacity
