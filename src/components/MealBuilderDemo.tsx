@@ -65,19 +65,19 @@ export function MealBuilderDemo({ onPress }: MealBuilderDemoProps) {
         <AppText
           variant="body"
           weight="semibold"
-          color="#2563EB"
+          color="primary"
           style={{ marginBottom: 8 }}
         >
           ✨ 3-Click Ordering System
         </AppText>
         <View style={{ gap: 4 }}>
-          <AppText variant="caption" color="#1E40AF">
+          <AppText variant="caption" color="secondary">
             1️⃣ Select meal base (Chicken, Salmon, etc.)
           </AppText>
-          <AppText variant="caption" color="#1E40AF">
+          <AppText variant="caption" color="secondary">
             2️⃣ Choose nutrition focus & amount
           </AppText>
-          <AppText variant="caption" color="#1E40AF">
+          <AppText variant="caption" color="secondary">
             3️⃣ Add to cart or order now
           </AppText>
         </View>

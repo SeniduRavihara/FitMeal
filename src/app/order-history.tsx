@@ -6,10 +6,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { CustomAlert } from "../components/CustomAlert";
 import { useCustomAlert } from "../hooks/useCustomAlert";
-import { Order, OrderService } from "../services/OrderService";
+import { Order, OrderItem, OrderService } from "../services/OrderService";
+
+// Extended interface for orders with items
+interface OrderWithItems extends Order {
+  order_items?: OrderItem[];
+}
 
 export default function OrderHistoryPage() {
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<OrderWithItems[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -24,7 +29,19 @@ export default function OrderHistoryPage() {
     try {
       setLoading(true);
       const userOrders = await OrderService.getUserOrders();
-      setOrders(userOrders);
+      // Fetch order items for each order
+      const ordersWithItems = await Promise.all(
+        userOrders.map(async (order) => {
+          try {
+            const { items } = await OrderService.getOrderWithItems(order.id);
+            return { ...order, order_items: items };
+          } catch (error) {
+            console.error(`Error fetching items for order ${order.id}:`, error);
+            return { ...order, order_items: [] };
+          }
+        })
+      );
+      setOrders(ordersWithItems);
     } catch (error) {
       console.error("Error loading orders:", error);
       showError("Error", "Failed to load orders. Please try again.");
@@ -121,7 +138,7 @@ export default function OrderHistoryPage() {
       ? orders
       : orders.filter((order) => order.order_status === selectedFilter);
 
-  const renderOrderItem = ({ item: order }: { item: Order }) => (
+  const renderOrderItem = ({ item: order }: { item: OrderWithItems }) => (
     <View
       style={{
         backgroundColor: "white",
@@ -183,7 +200,7 @@ export default function OrderHistoryPage() {
 
       {/* Order Items */}
       <View style={{ marginBottom: 16 }}>
-        {order.order_items?.map((item, index) => (
+        {order.order_items?.map((item: OrderItem, index: number) => (
           <View
             key={index}
             style={{
@@ -210,11 +227,11 @@ export default function OrderHistoryPage() {
                 {item.meal_name || "Custom Meal"}
               </AppText>
               <AppText variant="caption" color="secondary">
-                Qty: {item.quantity} × LKR {item.unit_price.toFixed(2)}
+                Qty: {item.quantity} × LKR {item.price_per_item.toFixed(2)}
               </AppText>
             </View>
             <AppText variant="body" weight="semibold" color="primary">
-              LKR {(item.unit_price * item.quantity).toFixed(2)}
+              LKR {(item.price_per_item * item.quantity).toFixed(2)}
             </AppText>
           </View>
         ))}
@@ -276,7 +293,7 @@ export default function OrderHistoryPage() {
             marginRight: 12,
           }}
         >
-          <AppText variant="body" weight="medium" color="#FB923C">
+          <AppText variant="body" weight="medium" color="accent">
             Reorder
           </AppText>
         </TouchableOpacity>
@@ -433,7 +450,7 @@ export default function OrderHistoryPage() {
         visible={visible}
         title={alertConfig?.title || ""}
         message={alertConfig?.message || ""}
-        type={alertConfig?.type || "info"}
+        type={alertConfig?.type || "default"}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

@@ -64,7 +64,12 @@ export function MealCustomizerScreen({
     setSelectedFocus(focus);
 
     // Set default amount based on focus
-    const defaultAmount = mealBase.availableCustomizations[focus].default;
+    // For 'balanced', use protein as default since it's not in availableCustomizations
+    const focusKey = focus === "balanced" ? "protein" : focus;
+    const defaultAmount =
+      mealBase.availableCustomizations[
+        focusKey as keyof typeof mealBase.availableCustomizations
+      ].default;
     setTargetAmount(defaultAmount);
   };
 
@@ -281,11 +286,6 @@ export function MealCustomizerScreen({
               onValueChange={handleAmountChange}
               minimumTrackTintColor={selectedFocusOption?.color || "#FF6B6B"}
               maximumTrackTintColor="#E5E5E5"
-              thumbStyle={{
-                width: 24,
-                height: 24,
-                backgroundColor: selectedFocusOption?.color || "#FF6B6B",
-              }}
             />
 
             <View

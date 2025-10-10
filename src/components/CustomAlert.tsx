@@ -143,7 +143,7 @@ export function CustomAlert({
             {/* Icon */}
             <View style={styles.iconContainer}>
               <Ionicons
-                name={typeConfig.icon}
+                name={typeConfig.icon as any}
                 size={48}
                 color={typeConfig.iconColor}
               />

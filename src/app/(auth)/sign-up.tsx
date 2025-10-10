@@ -32,7 +32,7 @@ export default function SignUpScreen() {
   const [alertConfig, setAlertConfig] = useState({
     title: "",
     message: "",
-    type: "info" as "success" | "error" | "warning" | "info",
+    type: "default" as "success" | "error" | "warning" | "default",
   });
   const { signUp } = useAuth();
 
@@ -121,7 +121,7 @@ export default function SignUpScreen() {
   const showAlert = (
     title: string,
     message: string,
-    type: "success" | "error" | "warning" | "info" = "info"
+    type: "success" | "error" | "warning" | "default" = "default"
   ) => {
     setAlertConfig({ title, message, type });
     setAlertVisible(true);

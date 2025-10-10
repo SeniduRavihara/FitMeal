@@ -68,7 +68,7 @@ export function MealBaseCard({ mealBase, onPress }: MealBaseCardProps) {
             borderRadius: 20,
           }}
         >
-          <AppText variant="caption" weight="medium" color="#2563EB">
+          <AppText variant="caption" weight="medium" color="primary">
             Customize
           </AppText>
         </View>

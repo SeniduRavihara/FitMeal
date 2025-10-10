@@ -13,6 +13,7 @@ export default function ShippingAddressPage() {
   const {
     showSuccess,
     showError,
+    showConfirmation,
     visible,
     alertConfig,
     handleConfirm,
@@ -80,15 +81,12 @@ export default function ShippingAddressPage() {
   };
 
   const handleDeleteAddress = (address: Address) => {
-    showError(
+    showConfirmation(
       "Delete Address",
       `Are you sure you want to delete "${address.full_name}"'s address?`,
       () => {
         // Confirm delete
         deleteAddress(address.id);
-      },
-      () => {
-        // Cancel - do nothing
       }
     );
   };
@@ -322,7 +320,7 @@ export default function ShippingAddressPage() {
                             <AppText
                               variant="caption"
                               weight="medium"
-                              color="#D97706"
+                              color="accent"
                             >
                               Default
                             </AppText>
@@ -384,7 +382,7 @@ export default function ShippingAddressPage() {
                           alignItems: "center",
                         }}
                       >
-                        <AppText variant="body" weight="medium" color="#FB923C">
+                        <AppText variant="body" weight="medium" color="accent">
                           Set as Default
                         </AppText>
                       </TouchableOpacity>
@@ -417,7 +415,7 @@ export default function ShippingAddressPage() {
         visible={visible}
         title={alertConfig?.title || ""}
         message={alertConfig?.message || ""}
-        type={alertConfig?.type || "info"}
+        type={alertConfig?.type || "default"}
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />

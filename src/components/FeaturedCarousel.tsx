@@ -35,7 +35,7 @@ interface FeaturedCarouselProps {
   items: FeaturedItem[]
 }
 
-export default function FeaturedCarousel() {
+export default function FeaturedCarousel({ items }: FeaturedCarouselProps) {
   const scrollViewRef = useRef<ScrollView>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [carouselItems, setCarouselItems] = useState<FeaturedItem[]>([])

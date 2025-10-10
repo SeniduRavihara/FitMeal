@@ -180,7 +180,7 @@ export function CustomMealCartScreen() {
                       marginTop: 4,
                     }}
                   >
-                    <AppText variant="caption" weight="medium" color="#2563EB">
+                    <AppText variant="caption" weight="medium" color="primary">
                       Custom:{" "}
                       {item.customization.focus.charAt(0).toUpperCase() +
                         item.customization.focus.slice(1)}

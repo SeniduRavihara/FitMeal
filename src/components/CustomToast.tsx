@@ -120,7 +120,7 @@ export function CustomToast({
         ]}
       >
         <Ionicons
-          name={typeConfig.icon}
+          name={typeConfig.icon as any}
           size={20}
           color={typeConfig.textColor}
           style={styles.icon}

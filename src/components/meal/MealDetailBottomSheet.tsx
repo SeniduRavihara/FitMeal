@@ -132,7 +132,7 @@ export default function MealDetailBottomSheet({
                   </View>
                   <View className="items-center flex-1">
                     <AppText className="text-xl font-bold text-gray-900">
-                      {meal.nutrition.fat}g
+                      {meal.nutrition.fats}g
                     </AppText>
                     <AppText className="text-xs text-gray-500 mt-1">
                       Fat

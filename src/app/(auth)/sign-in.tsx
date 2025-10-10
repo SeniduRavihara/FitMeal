@@ -26,7 +26,7 @@ export default function SignInScreen() {
   const [alertConfig, setAlertConfig] = useState({
     title: "",
     message: "",
-    type: "info" as "success" | "error" | "warning" | "info",
+    type: "default" as "success" | "error" | "warning" | "default",
   });
   const { signIn } = useAuth();
 
@@ -62,7 +62,7 @@ export default function SignInScreen() {
   const showAlert = (
     title: string,
     message: string,
-    type: "success" | "error" | "warning" | "info" = "info"
+    type: "success" | "error" | "warning" | "default" = "default"
   ) => {
     setAlertConfig({ title, message, type });
     setAlertVisible(true);
@@ -136,7 +136,7 @@ export default function SignInScreen() {
     showAlert(
       "Feature Coming Soon",
       "Password reset functionality will be available soon.",
-      "info"
+      "default"
     );
   };
 
