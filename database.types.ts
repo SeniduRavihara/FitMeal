@@ -12,33 +12,50 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "13.0.5"
   }
-  graphql_public: {
-    Tables: {
-      [_ in never]: never
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      graphql: {
-        Args: {
-          extensions?: Json
-          operationName?: string
-          query?: string
-          variables?: Json
-        }
-        Returns: Json
-      }
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          address_line1: string
+          address_line2: string | null
+          created_at: string
+          full_name: string
+          id: string
+          is_default: boolean | null
+          latitude: number | null
+          longitude: number | null
+          phone_number: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address_line1: string
+          address_line2?: string | null
+          created_at?: string
+          full_name: string
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          phone_number: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address_line1?: string
+          address_line2?: string | null
+          created_at?: string
+          full_name?: string
+          id?: string
+          is_default?: boolean | null
+          latitude?: number | null
+          longitude?: number | null
+          phone_number?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       carousel_items: {
         Row: {
           action_type: string
@@ -102,6 +119,110 @@ export type Database = {
         }
         Relationships: []
       }
+      order_items: {
+        Row: {
+          base_price: number
+          created_at: string
+          customization: Json
+          customization_fee: number
+          id: string
+          meal_base_id: string
+          meal_name: string
+          order_id: string
+          price_per_item: number
+          quantity: number
+          total_price: number
+          updated_at: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          customization: Json
+          customization_fee?: number
+          id?: string
+          meal_base_id: string
+          meal_name: string
+          order_id: string
+          price_per_item: number
+          quantity: number
+          total_price: number
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          customization?: Json
+          customization_fee?: number
+          id?: string
+          meal_base_id?: string
+          meal_name?: string
+          order_id?: string
+          price_per_item?: number
+          quantity?: number
+          total_price?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          created_at: string
+          delivery_address: Json
+          delivery_fee: number
+          estimated_delivery_time: string | null
+          id: string
+          notes: string | null
+          order_number: string
+          order_status: string
+          payment_method: string
+          payment_status: string
+          subtotal: number
+          total_amount: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_address: Json
+          delivery_fee?: number
+          estimated_delivery_time?: string | null
+          id?: string
+          notes?: string | null
+          order_number: string
+          order_status?: string
+          payment_method?: string
+          payment_status?: string
+          subtotal: number
+          total_amount: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_address?: Json
+          delivery_fee?: number
+          estimated_delivery_time?: string | null
+          id?: string
+          notes?: string | null
+          order_number?: string
+          order_status?: string
+          payment_method?: string
+          payment_status?: string
+          subtotal?: number
+          total_amount?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
@@ -110,6 +231,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
@@ -119,6 +241,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
@@ -128,6 +251,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Relationships: []
@@ -137,10 +261,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_order_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin" | "moderator" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -266,10 +397,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
-  graphql_public: {
-    Enums: {},
-  },
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["user", "admin", "moderator", "super_admin"],
+    },
   },
 } as const

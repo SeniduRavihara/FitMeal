@@ -3,7 +3,6 @@ import React from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
-import { FloatingCartIcon } from "../components/FloatingCartIcon";
 import { SUBSCRIPTION_PLANS } from "../constants";
 
 export function SubscriptionsScreen() {
@@ -148,9 +147,6 @@ export function SubscriptionsScreen() {
           </View>
         </View>
       </ScrollView>
-
-      {/* Floating Cart Icon */}
-      <FloatingCartIcon />
     </SafeAreaView>
   );
 }

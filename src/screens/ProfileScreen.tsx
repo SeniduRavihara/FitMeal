@@ -4,7 +4,6 @@ import React from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
-import { FloatingCartIcon } from "../components/FloatingCartIcon";
 import { useAuth } from "../contexts/AuthContext";
 
 export function ProfileScreen() {
@@ -229,9 +228,6 @@ export function ProfileScreen() {
         {/* Bottom Spacing */}
         <View className="h-20" />
       </ScrollView>
-
-      {/* Floating Cart Icon */}
-      <FloatingCartIcon />
     </SafeAreaView>
   );
 }

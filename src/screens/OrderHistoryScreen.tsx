@@ -5,7 +5,6 @@ import { FlatList, RefreshControl, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AppText } from "../components/AppText";
 import { CustomAlert } from "../components/CustomAlert";
-import { FloatingCartIcon } from "../components/FloatingCartIcon";
 import { useCustomAlert } from "../hooks/useCustomAlert";
 import { Order, OrderService } from "../services/OrderService";
 import { getScrollViewContentStyle } from "../utils/navigationSpacing";
@@ -309,9 +308,6 @@ export function OrderHistoryScreen() {
           showCancel={alertConfig.showCancel}
         />
       )}
-
-      {/* Floating Cart Icon */}
-      <FloatingCartIcon />
     </SafeAreaView>
   );
 }

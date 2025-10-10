@@ -1,11 +1,32 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import React, { useState } from "react";
 import { SafeAreaView, View } from "react-native";
-import { FloatingTabBarProfessional } from "../../components/navigation/FloatingTabBarProfessional";
+import { SimpleBottomNav } from "../../components/navigation/SimpleBottomNav";
 import { TabName } from "../../types";
 
 export default function TabLayout() {
   const [activeTab, setActiveTab] = useState<TabName>("home");
+  const router = useRouter();
+
+  const handleTabPress = (tab: TabName) => {
+    setActiveTab(tab);
+
+    // Navigate to the correct tab
+    switch (tab) {
+      case "home":
+        router.push("/(tabs)/");
+        break;
+      case "subscriptions":
+        router.push("/(tabs)/subscriptions");
+        break;
+      case "orders":
+        router.push("/(tabs)/orders");
+        break;
+      case "profile":
+        router.push("/(tabs)/profile");
+        break;
+    }
+  };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#FAFAFA" }}>
@@ -66,13 +87,7 @@ export default function TabLayout() {
           />
         </Tabs>
 
-        <FloatingTabBarProfessional
-          activeTab={activeTab}
-          onTabPress={(tab) => {
-            setActiveTab(tab);
-            // The tab navigation will handle the actual navigation
-          }}
-        />
+        <SimpleBottomNav activeTab={activeTab} onTabPress={handleTabPress} />
       </View>
     </SafeAreaView>
   );
