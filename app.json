@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "expo-starter",
-    "slug": "expo-starter",
-    "scheme": "expo-starter",
+    "name": "FitMeal",
+    "slug": "fitmeal",
+    "scheme": "fitmeal",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -20,13 +20,20 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.fitmeal"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6c5145bb-2e01-4936-92ce-25509303a843"
+      }
+    }
   }
 }
